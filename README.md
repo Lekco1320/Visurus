@@ -2,7 +2,7 @@
 
 > [![hugo-papermod](https://img.shields.io/badge/visurus-@Lekco-red)](https://github.com/Lekco1320/visurus)
 > [![release](https://img.shields.io/github/v/release/Lekco1320/visurus)](https://github.com/Lekco1320/visurus/releases)
-> [![license](https://img.shields.io/github/license/Lekco1320/visurus)](https://github.com/Lekco1320/visurus/blob/master/LICENSE)
+> [![Apache License](https://img.shields.io/npm/l/echarts?color=green)](LICENSE)
 >
 > ***Visurus*** is the future participle form of the Latin verb ***videō*** (to see).
 
