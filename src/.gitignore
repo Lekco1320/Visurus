@@ -1,0 +1,5 @@
+**/__pycache__/
+/**/*.pyc
+/config.ini
+/clear.ps1
+/test.py
