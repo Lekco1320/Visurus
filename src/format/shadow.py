@@ -1,14 +1,13 @@
-import util.menu as menu
-import util.printer as prt
-import util.output as output
-import util.workspace as workspace
+from util import *
+from util import menu
+from util import color
+from util import output
+from util import workspace
 
 from PIL import Image
 from PIL import ImageFilter
-from config.main import Config
-from util.color import color
-from util.wrapper import wrapper
-from util.errhandler import errhandler
+
+from config import Config
 
 targets = []
 shadow  = wrapper(Config['shadow.color'])
@@ -28,10 +27,10 @@ def main():
     m.run()
 
 def display():
-    prt.left(f'已选择 {len(targets)} 张目标图像:')
+    print_left(f'已选择 {len(targets)} 张目标图像:')
     for i in range(len(targets)):
-        prt.left(f'{i + 1}. ' + targets[i].formated_name())
-    prt.split()
+        print_left(f'{i + 1}. ' + targets[i].formated_name())
+    print_spliter()
 
 # 选择图片对象
 def choose_targets():
@@ -45,7 +44,7 @@ def execute():
     
     out = []
     for srcimg in targets:
-        prt.output(f'正在处理 {srcimg.name}...')
+        print_output(f'正在处理 {srcimg.name}...')
         processed = process(srcimg.image)
         out.append(output.outimage(processed, srcimg))
     
@@ -61,50 +60,50 @@ def style_main():
     m.add(menu.option('Q', '返回'))
     m.run()
 
-def set_color(shadow : wrapper):
+def set_color(shadow: wrapper):
     shadow.data = color.input().hex
 
-def get_color(shadow : wrapper) -> str:
+def get_color(shadow: wrapper) -> str:
     return shadow.data
 
 @errhandler
-def set_offset(offset : wrapper):
-    prt.output('请输入偏移量 x,y :')
-    ans = list(map(int, prt.input().split(',')))
+def set_offset(offset: wrapper):
+    print_output('请输入偏移量 x,y :')
+    ans = list(map(int, get_input().split(',')))
     if len(ans) != 2:
         raise ValueError(f'错误的坐标分量数 \'{len(ans)}\'.')
     offset.data = (ans[0], ans[1])
 
-def get_offset(offset : wrapper) -> str:
+def get_offset(offset: wrapper) -> str:
     return offset.data.__str__()
 
 @errhandler
-def set_limit(limit : wrapper):
-    prt.output('请输入范围限制 x,y:')
-    ans = list(map(int, prt.input().split(',')))
+def set_limit(limit: wrapper):
+    print_output('请输入范围限制 x,y:')
+    ans = list(map(int, get_input().split(',')))
     if len(ans) != 2:
         raise ValueError(f'错误的坐标分量数 \'{len(ans)}\'.')
     limit.data = (ans[0], ans[1])
 
-def get_limit(limit : wrapper) -> str:
+def get_limit(limit: wrapper) -> str:
     return limit.data.__str__()
 
 @errhandler
-def set_blur(blur : wrapper):
-    prt.output('请输入模糊程度(>=0):')
-    ans = int(prt.input())
+def set_blur(blur: wrapper):
+    print_output('请输入模糊程度(>=0):')
+    ans = int(get_input())
     if ans < 0:
         raise ValueError(f'模糊程度 \'{ans}\' 无效.')
     blur.data = ans
 
-def get_blur(blur : wrapper) -> str:
+def get_blur(blur: wrapper) -> str:
     return blur.data.__str__()
 
-def process(image : Image.Image) -> Image.Image:
+def process(image: Image.Image) -> Image.Image:
     return _blur(image, (offset.data[0], offset.data[1]), (limit.data[0], limit.data[1]), color(shadow.data), blur.data)
 
 # https://code.activestate.com/recipes/474116-drop-shadows-with-pil/
-def _blur(image : Image.Image, offset : tuple, limit : tuple, color : color, depth : int) -> Image.Image:
+def _blur(image: Image.Image, offset: tuple, limit: tuple, color: color, depth: int) -> Image.Image:
     """
     Add a gaussian blur drop shadow to an image.
     image       - The image to overlay on top of the shadow.

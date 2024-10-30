@@ -1,5 +1,5 @@
 class wrapper:
-    def __init__(self, data : object = None) -> None:
+    def __init__(self, data: object = None) -> None:
         if isinstance(data, wrapper):
             self._data = data.data
         else:

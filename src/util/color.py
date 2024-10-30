@@ -1,13 +1,11 @@
-import util.printer as prt
-
-from util.errhandler import errhandler
+from util import *
 
 class color:
-    def __init__(self, value : tuple | str) -> None:
+    def __init__(self, value: tuple | str) -> None:
         self._r, self._g, self._b, self._a = color.check(value)
     
     @staticmethod
-    def check(value : tuple | str) -> tuple[int, int, int, int]:
+    def check(value: tuple | str) -> tuple[int, int, int, int]:
         r, g, b, a = 255, 255, 255, 255
         if  isinstance(value, tuple):
             r = color._check_channel(value[0])
@@ -48,21 +46,21 @@ class color:
     @staticmethod
     @errhandler
     def input() -> 'color':
-        prt.output('请任选一种格式输入颜色值:')
-        prt.ps('分量表示: R,G,B')
-        prt.ps('十六进制表示: #??????')
-        ans = prt.input()
+        print_output('请任选一种格式输入颜色值:')
+        print_ps('分量表示: R,G,B')
+        print_ps('十六进制表示: #??????')
+        ans = get_input()
         c   = None
         if ans.startswith('#'):
             c = ans
         else:
             c = tuple(map(int, ans.split(',')))
         c = color(c)
-        prt.output('请任选一种格式输入不透明度:')
-        prt.ps('百分比表示: ??%')
-        prt.ps('十进制表示: 0~255')
-        prt.ps('十六进制表示: #??')
-        ans = prt.input()
+        print_output('请任选一种格式输入不透明度:')
+        print_ps('百分比表示: ??%')
+        print_ps('十进制表示: 0~255')
+        print_ps('十六进制表示: #??')
+        ans = get_input()
         if   ans.endswith('%'):
             opc = int(ans[:-1]) / 100 * 255
         elif ans.startswith('#'):

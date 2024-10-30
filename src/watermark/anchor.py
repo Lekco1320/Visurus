@@ -11,7 +11,7 @@ class vertical_alignment(Enum):
     BOTTOM = 2
 
 class anchor:
-    def __init__(self, position : tuple[int, int], offset : tuple[int, int], halign = horizonal_alignment.LEFT, valign = vertical_alignment.TOP):        
+    def __init__(self, position: tuple[int, int], offset: tuple[int, int], halign = horizonal_alignment.LEFT, valign = vertical_alignment.TOP):        
         self._position = position
         self._offset   = offset
         self._halign   = halign
@@ -29,7 +29,7 @@ class anchor:
     def vAlign(self):
         return self._valign
     
-    def real_position(self, size : tuple[int, int]) -> tuple[int, int]:
+    def real_position(self, size: tuple[int, int]) -> tuple[int, int]:
         width, height = size
         x, y = self._position
         if   self._halign == horizonal_alignment.RIGHT:

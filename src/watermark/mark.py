@@ -4,11 +4,11 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 
-from watermark.anchor import anchor
-from watermark.scaler import scaler
+from watermark import anchor
+from watermark import scaler
 
 class markbase(ABC):
-    def __init__(self, anchor : anchor, scaler : scaler) -> None:
+    def __init__(self, anchor: anchor, scaler: scaler) -> None:
         super().__init__()
         
         self._anchor = anchor
@@ -28,11 +28,11 @@ class markbase(ABC):
         pass
     
     @abstractmethod
-    def mark(self, image : Image.Image) -> Image.Image:
+    def mark(self, image: Image.Image) -> Image.Image:
         pass
 
 class image_mark(markbase):
-    def __init__(self, anchor: anchor, scaler: scaler, image : str, opacity : float) -> None:
+    def __init__(self, anchor: anchor, scaler: scaler, image: str, opacity: float) -> None:
         super().__init__(anchor, scaler)
         
         self._image   = image
@@ -68,7 +68,7 @@ class image_mark(markbase):
     def opacity(self):
         return self._opacity
     
-    def mark(self, image : Image.Image) -> Image.Image:
+    def mark(self, image: Image.Image) -> Image.Image:
         position = self._anchor.real_position(self._size)
         with Image.open(self._image).convert('RGBA') as img:
             nimg = img.resize(self._size)
@@ -78,7 +78,7 @@ class image_mark(markbase):
             return image
 
 class label_mark(markbase):
-    def __init__(self, anchor : anchor, scaler : scaler, font : str, color : tuple, text : str) -> None:
+    def __init__(self, anchor: anchor, scaler: scaler, font: str, color: tuple, text: str) -> None:
         super().__init__(anchor, scaler)
         
         self._font      = font

@@ -1,15 +1,15 @@
 # Lekco Visurus. 2024.5.23.
 
 import sys
-import util.menu as menu
-import util.about as about
-import util.stitching as stitching
-import util.workspace as workspace
-import format.main as format
-import config.main as config
-import watermark.main as watermark
+import format
+import watermark
+import config
 
-from util.errhandler import errhandler
+from util import *
+from util import menu
+from util import about
+from util import stitching
+from util import workspace
 
 @errhandler
 def main():

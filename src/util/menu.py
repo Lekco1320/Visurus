@@ -1,5 +1,5 @@
-import util.printer as prt
-import util.ansi as ansi
+from util import *
+from util import ansi
 
 from abc import ABC
 from abc import abstractmethod
@@ -19,7 +19,7 @@ class item(ABC):
         pass
 
 class option(item):
-    def __init__(self, key : str, text : str, jmpfunc = None, valfunc = None, enfunc = None):
+    def __init__(self, key: str, text: str, jmpfunc = None, valfunc = None, enfunc = None):
         super().__init__(enfunc)
         
         self._key     = key
@@ -41,14 +41,14 @@ class option(item):
             return self._valfunc()
         elif isinstance(self._valfunc, str):
             return self._valfunc
-        elif isinstance(self._valfunc, ansi.fstr):
+        elif isinstance(self._valfunc, ansi.ansi_str):
             return self._valfunc
-        elif isinstance(self._valfunc, ansi.fstrs):
+        elif isinstance(self._valfunc, ansi.ansi_stream):
             return self._valfunc
         return None
     
     def show(self):
-        prt.option(self._key, self._text, self.value)
+        print_option(self._key, self._text, self.value)
     
     def jump(self):
         if callable(self._jmpfunc):
@@ -65,7 +65,7 @@ class option(item):
         return hash(self._key)
 
 class splitter(item):
-    def __init__(self, text : str, enfunc = None):
+    def __init__(self, text: str, enfunc = None):
         super().__init__(enfunc)
         
         self._text = text
@@ -76,9 +76,9 @@ class splitter(item):
     
     def show(self):
         if isinstance(self._text, str):
-            prt.center(ansi.fstr(self._text, ansi.format(ansi.style.BOLD, ansi.color.WHITE)))
+            print_center(ansi.ansi_str(self._text, ansi.ansi_format(ansi.style.BOLD, ansi.color.WHITE)))
         else:
-            prt.left(self._text)
+            print_left(self._text)
     
     def __eq__(self, value: object) -> bool:
         if isinstance(value, splitter):
@@ -102,10 +102,10 @@ class display(item):
             if   callable(item):
                 item()
             else:
-                prt.left(item.__str__())
+                print_left(item.__str__())
 
 class menu:
-    def __init__(self, name : str, canceller : str = None) -> None:
+    def __init__(self, name: str, canceller: str = None) -> None:
         self._name      = name
         self._canceller = canceller
         self._display   = []
@@ -128,7 +128,7 @@ class menu:
     def items(self):
         return self._items
     
-    def add(self, obj : item):
+    def add(self, obj: item):
         if   isinstance(obj, option):
             self._items.append(obj)
         elif isinstance(obj, splitter):
@@ -143,8 +143,8 @@ class menu:
     
     def run(self):
         while self._flag:
-            prt.clrs()
-            prt.stitle(self._name)
+            clear_screen()
+            print_title(self._name)
             
             for display in self._display:
                 display.show()
@@ -152,16 +152,16 @@ class menu:
             for item in self._items:
                 if item.enabled:
                     item.show()
-            prt.split()
+            print_spliter()
             
-            key = prt.input().strip().upper()
+            key = get_input().strip().upper()
             result = [item for item in self._items if isinstance(item, option) and item.enabled and item == key]
             if len(result) < 1:
                 continue
             
             opt = result[0]
-            ansi.upper_line()
-            prt.output(f'{opt.key} | {opt.text}')
+            up_line()
+            print_output(f'{opt.key} | {opt.text}')
             
             opt.jump()
             if key == self._canceller:

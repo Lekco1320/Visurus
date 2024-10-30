@@ -1,15 +1,16 @@
 import random
-import util.menu as menu
-import util.printer as prt
-import util.output as output
-import util.workspace as workspace
 import watermark.style as style
 
+from .scaler import *
+from .anchor import *
+from .mark import *
+
+from util import *
+from util import menu
+from util import output
+from util import workspace
+
 from PIL import Image
-from watermark.scaler import *
-from watermark.anchor import *
-from watermark.mark import *
-from util.errhandler import errhandler
 
 # 变量
 targets = []
@@ -26,10 +27,10 @@ def main():
     m.run()
 
 def display():
-    prt.left(f'已选择 {len(targets)} 张目标图像:')
+    print_left(f'已选择 {len(targets)} 张目标图像:')
     for i in range(len(targets)):
-        prt.left(f'{i + 1}. ' + targets[i].formated_name())
-    prt.split()
+        print_left(f'{i + 1}. ' + targets[i].formated_name())
+    print_spliter()
 
 #endregion
 
@@ -40,7 +41,7 @@ def choose_targets():
 
 #region 图像处理
 
-def get_scaler(size : tuple[int, int]) -> scaler:
+def get_scaler(size: tuple[int, int]) -> scaler:
     sscaler = None
     if  style.scale.data[0] == '固定尺寸':
         sscaler = fixed_scaler(style.scale.data[1][0], style.scale.data[1][1])
@@ -49,7 +50,7 @@ def get_scaler(size : tuple[int, int]) -> scaler:
         sscaler = proportion_scaler(ref, style.scale.data[2], size)
     return sscaler
 
-def get_position(size : tuple[int, int]) -> tuple[int, int]:
+def get_position(size: tuple[int, int]) -> tuple[int, int]:
     if   style.position.data == '随机':
         return (random.randint(0, size[0]), random.randint(0, size[1]))
     elif isinstance(style.position.data, tuple):
@@ -74,7 +75,7 @@ def get_position(size : tuple[int, int]) -> tuple[int, int]:
     elif key == '右下角':
         return (size[0], size[1])
 
-def get_anchor(position : tuple[int, int]) -> anchor:
+def get_anchor(position: tuple[int, int]) -> anchor:
     haligndict = {
         '左对齐'   : horizonal_alignment.LEFT,
         '居中对齐' : horizonal_alignment.CENTER,
@@ -83,11 +84,11 @@ def get_anchor(position : tuple[int, int]) -> anchor:
     valigndict = {
         '顶部对齐' : vertical_alignment.TOP,
         '居中对齐' : vertical_alignment.CENTER,
-        '底部对齐'   : vertical_alignment.BOTTOM
+        '底部对齐' : vertical_alignment.BOTTOM
     }
     return anchor(position, style.offset.data, haligndict[style.aligns.data[0]], valigndict[style.aligns.data[1]])
 
-def get_mark(anchor : anchor, scaler : scaler) -> markbase:
+def get_mark(anchor: anchor, scaler: scaler) -> markbase:
     mark = None
     if  style.content.data == '文字':
         mark = label_mark(anchor, scaler, style.font.data, style.fcolor.data, style.ftext.data)
@@ -95,7 +96,7 @@ def get_mark(anchor : anchor, scaler : scaler) -> markbase:
         mark = image_mark(anchor, scaler, style.psource.data, style.opacity.data)
     return mark
 
-def process(img : Image.Image) -> Image.Image:
+def process(img: Image.Image) -> Image.Image:
     position = get_position(img.size)
     anchor   = get_anchor(position)
     scaler   = get_scaler(img.size)
@@ -109,7 +110,7 @@ def execute():
     
     out = []
     for srcimg in targets:
-        prt.output(f'正在处理 {srcimg.name}...')
+        print_output(f'正在处理 {srcimg.name}...')
         processed = process(srcimg.image)
         out.append(output.outimage(processed, srcimg))
     

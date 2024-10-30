@@ -1,13 +1,12 @@
-import util.menu as menu
-import util.printer as prt
-import util.output as output
-import util.workspace as workspace
+from util import *
+from util import menu
+from util import output
+from util import workspace
 
 from PIL import Image
 from PIL import ImageDraw
-from config.config import Config
-from util.wrapper import wrapper
-from util.errhandler import errhandler
+
+from config import Config
 
 targets = []
 radius  = wrapper(Config['round_corner.radius'])
@@ -30,10 +29,10 @@ def radius_value() -> str:
     return get_radius(radius)
 
 def display():
-    prt.left(f'已选择 {len(targets)} 张目标图像:')
+    print_left(f'已选择 {len(targets)} 张目标图像:')
     for i in range(len(targets)):
-        prt.left(f'{i + 1}. ' + targets[i].formated_name())
-    prt.split()
+        print_left(f'{i + 1}. ' + targets[i].formated_name())
+    print_spliter()
 
 # 选择图片对象
 def choose_targets():
@@ -41,14 +40,14 @@ def choose_targets():
     targets = workspace.c_main()
 
 @errhandler
-def set_radius(radius : wrapper):
-    prt.output('请输入圆角半径:')
-    value = int(prt.input())
+def set_radius(radius: wrapper):
+    print_output('请输入圆角半径:')
+    value = int(get_input())
     if value < 0:
         raise ValueError(f'非法的圆角半径值 {value}')
     radius.data = value
 
-def get_radius(radius : wrapper) -> str:
+def get_radius(radius: wrapper) -> str:
     return f'{radius.data}px'
 
 @errhandler
@@ -58,7 +57,7 @@ def execute():
     
     out = []
     for srcimg in targets:
-        prt.output(f'正在处理 {srcimg.name}...')
+        print_output(f'正在处理 {srcimg.name}...')
         processed = process(srcimg.image)
         out.append(output.outimage(processed, srcimg))
     
@@ -66,7 +65,7 @@ def execute():
         output.main(out)
 
 # https://www.pyget.cn/p/185266
-def process(image : Image.Image) -> Image.Image: 
+def process(image: Image.Image) -> Image.Image: 
     radii = radius.data
     circle = Image.new('L', (radii * 2, radii * 2), 0)
     draw = ImageDraw.Draw(circle)

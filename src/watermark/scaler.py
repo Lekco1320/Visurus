@@ -22,7 +22,7 @@ class scaler(ABC):
         pass
 
 class fixed_scaler(scaler):
-    def __init__(self, width : int | str, height : int | str) -> None:
+    def __init__(self, width: int | str, height: int | str) -> None:
         super().__init__()
         
         self._width  = width if width != '*' else None
@@ -45,7 +45,7 @@ class scale_ref(Enum):
     HEIGHT = 1
 
 class proportion_scaler(scaler):
-    def __init__(self, scale_ref : scale_ref, proportion : float, ref : tuple[int, int]) -> None:
+    def __init__(self, scale_ref: scale_ref, proportion: float, ref: tuple[int, int]) -> None:
         super().__init__()
         
         if proportion <= 0:

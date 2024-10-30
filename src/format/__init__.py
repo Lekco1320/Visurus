@@ -1,5 +1,4 @@
-import util.menu as menu
-
+from util   import menu
 from format import species_label
 from format import photo_params
 from format import shadow

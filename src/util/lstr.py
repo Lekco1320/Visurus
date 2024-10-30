@@ -1,7 +1,7 @@
 from typing import Any
 
 class lstr:
-    def __init__(self, text : str = '') -> None:
+    def __init__(self, text: str = '') -> None:
         self._textlist = []
         self._raw      = text
         self._id       = 0
@@ -12,7 +12,7 @@ class lstr:
     def text(self):
         return self._raw
     
-    def _split(self, text : str):
+    def _split(self, text: str):
         left = []
         if len(text) == 0:
             return

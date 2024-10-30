@@ -1,16 +1,25 @@
 from enum import Enum
 from enum import Flag
+from typing import *
 
 class color(Enum):
-    DEFAULT = 8
-    BLACK   = 0
-    RED     = 1
-    GREEN   = 2
-    YELLOW  = 3
-    BLUE    = 4
-    MAGENTA = 5
-    CYAN    = 6
-    WHITE   = 7
+    DEFAULT        = -1
+    BLACK          = 0
+    RED            = 1
+    GREEN          = 2
+    YELLOW         = 3
+    BLUE           = 4
+    MAGENTA        = 5
+    CYAN           = 6
+    WHITE          = 7
+    BRIGHT_BLACK   = 8
+    BRIGHT_RED     = 9
+    BRIGHT_GREEN   = 10
+    BRIGHT_YELLOW  = 11
+    BRIGHT_BLUE    = 12
+    BRIGHT_MAGENTA = 13
+    BRIGHT_CYAN    = 14
+    BRIGHT_WHITE   = 15
 
 class style(Flag):
     DEFAULT       = 0
@@ -24,7 +33,7 @@ class style(Flag):
     HIDE          = 128
     STRIKETHROUGH = 256
 
-STYLE_DICT : dict = { 
+STYLE_DICT: dict = { 
     style.BOLD          : 1,
     style.FAINT         : 2,
     style.ITALIC        : 3,
@@ -36,10 +45,12 @@ STYLE_DICT : dict = {
     style.STRIKETHROUGH : 9
 }
 
-class format:
+class ansi_format: 
     CONTROL_CODE = '\033['
     
-    def __init__(self, style = style.DEFAULT, foreground = color.DEFAULT, background = color.DEFAULT) -> None:
+    def __init__(self, style = style.DEFAULT,
+                 foreground  = color.DEFAULT,
+                 background  = color.DEFAULT) -> None:
         self._style      = style
         self._foreground = foreground
         self._background = background
@@ -68,141 +79,202 @@ class format:
     def background(self, value):
         self._background = value
     
-    def enable(self) -> str:
-        ret = format.disable()
+    @property
+    def enable_ansi(self) -> str:
+        ret = self.disable_ansi
         for style in self._style:
-            ret += f'{format.CONTROL_CODE}{STYLE_DICT[style]}m'
-        if  self._foreground != color.DEFAULT:
-            ret += f'{format.CONTROL_CODE}3{self._foreground.value}m'
-        if  self._background != color.DEFAULT:
-            ret += f'{format.CONTROL_CODE}4{self._background.value}m'
+           ret += f'{ansi_format.CONTROL_CODE}{STYLE_DICT[style]}m'
+        if self._foreground != color.DEFAULT:
+           ret += f'{ansi_format.CONTROL_CODE}3{self._foreground.value % 8}' + \
+                  (';1' if (self._foreground.value & 8) > 0 else '') + 'm'
+        if self._background != color.DEFAULT:
+           ret += f'{ansi_format.CONTROL_CODE}4{self._background.value % 8}' + \
+                  (';1' if (self._background.value & 8) > 0 else '') + 'm'
         return ret
     
-    @staticmethod
-    def disable() -> str:
-        return f'{format.CONTROL_CODE}0m'
+    @property
+    def disable_ansi(self) -> str:
+        return f'{ansi_format.CONTROL_CODE}0m'
+    
+    def copy(self) -> 'ansi_format':
+        return ansi_format(self._style, self._foreground, self._background)
+    
+    def __eq__(self, value: object) -> bool:
+        if  not isinstance(value, ansi_format):
+            return False
+        return self._style == value._style and \
+               self._foreground == value._foreground and \
+               self._background == value._background
+    
+    def __repr__(self) -> str:
+        return f'format{{{self._style}, {self._foreground}, {self._background}}}'
+    
+    def __str__(self) -> str:
+        return self.__repr__()
+    
+    def __hash__(self) -> int:
+        hash((self._style, self._foreground, self._background))
 
-class fstr:
-    def __init__(self, text : str, format = format()) -> None:
-        self._text   = text
+DEFAULT_FORMAT = ansi_format()
+ERROR_FORMAT   = ansi_format(foreground=color.BRIGHT_RED)
+PS_FORMAT      = ansi_format(foreground=color.BLUE)
+
+class ansi_str:
+    def __init__(self, str: str, format: ansi_format) -> None:
+        self._str    = str
         self._format = format
-        self._ptr    = 0
+        
+    @property
+    def str(self) -> str:
+        return self._str
+    
+    @str.setter
+    def str(self, value: 'str'):
+        self._str = value
     
     @property
-    def text(self) -> str:
-        return self._text
-    
-    @text.setter
-    def text(self, value):
-        self._text = value
-    
-    @property
-    def format(self) -> format:
+    def format(self) -> ansi_format:
         return self._format
     
     @format.setter
-    def format(self, value):
+    def format(self, value: format):
         self._format = value
     
-    def __str__(self) -> str:
-        return self._format.enable() + self._text + format.disable()
+    def copy(self) -> 'ansi_str':
+        return ansi_str(self._str, self._format.copy())
+    
+    def __iter__(self):
+        return iter(self._str)
+    
+    def __str__(self) -> 'str':
+        return self._format.enable_ansi + self.str + self._format.disable_ansi
+    
+    def __repr__(self) -> 'str':
+        return f'ansi_str{{"{self._str}", {self._format}}}'
     
     def __len__(self) -> int:
-        return self._text.__len__()
+        return self._str.__len__()
     
-    def __add__(self, _str) -> 'fstrs':
-        if   isinstance(_str, fstr):
-            return fstrs(self, _str)
-        elif isinstance(_str, str):
-            return fstrs(self, fstr(_str))
-        elif isinstance(_str, fstrs):
-            return self + _str
-        else:
-            raise TypeError(f'Unsupported type \'{type(_str).__name__}\'.')
+    def __getitem__(self, index) -> 'str':
+        return self._str[index]
 
-    def __radd__(self, _str) -> 'fstrs':
-        if   isinstance(_str, fstr):
-            return fstrs(_str, self)
-        elif isinstance(_str, str):
-            return fstrs(fstr(_str), self)
-        elif isinstance(_str, fstrs):
-            return _str + self
-        else:
-            raise TypeError(f'Unsupported type \'{type(_str).__name__}\'.')
-
-    def __mul__(self, times : int) -> 'fstr':
-        return fstr(self._text * times, self._format)
+    def __eq__(self, value: object) -> bool:
+        if not isinstance(value, ansi_str):
+            return False
+        return self._format == value._format and self.str == value.str
     
-    def __iter__(self) -> 'fstr':
-        self._ptr = 0
-        return self
+    def __hash__(self) -> int:
+        return hash((self._format, self._str))
     
-    def __next__(self) -> str:
-        if self._ptr >= self._text.__len__():
-            raise StopIteration
-        self._ptr += 1
-        return self._text[self._ptr - 1]
+    def __add__(self, other: Union['str', 'ansi_str', 'ansi_stream']) -> 'ansi_stream':
+        if isinstance(other, str):
+            astr = ansi_str(other, ansi_format())
+            return ansi_stream([self, astr])
+        if isinstance(other, ansi_str):
+            return ansi_stream([self, other])
+        if isinstance(other, ansi_stream):
+            ret = other.copy()
+            ret._astrs.insert(0, self)
+            return ret
+    
+    def __radd__(self, other: Union['str', 'ansi_str', 'ansi_stream']) -> 'ansi_stream':
+        if isinstance(other, str):
+            astr = ansi_str(other, ansi_format())
+            return ansi_stream([astr, self])
+        if isinstance(other, ansi_str):
+            return ansi_stream([other, self])
+        if isinstance(other, ansi_stream):
+            ret = other.copy()
+            ret._astrs.append(self)
+            return ret
 
-class fstrs: 
-    def __init__(self, *args) -> None:
-        self._fstrs = []
-        self._ptr  = 0
-        self._text = ''
-        for str in args:
-            self._fstrs.append(str)
-
-    def __add__(self, _fstr : str | fstr) -> 'fstrs':
-        if isinstance(_fstr, fstr):
-            self._fstrs.append(_fstr)
-        elif isinstance(_fstr, str):
-            self._fstrs.append(fstr(_fstr))
-        elif isinstance(_fstr, fstrs):
-            for fs in _fstr._fstrs:
-                self._fstrs.append(fs)
-        return self
-
-    def __radd__(self, _fstr : str | fstr) -> 'fstrs':
-        if isinstance(_fstr, fstr):
-            self._fstrs.insert(0, _fstr)
-        elif isinstance(_fstr, str):
-            self._fstrs.insert(0, fstr(_fstr))
-        elif isinstance(_fstr, fstrs):
-            for fs in _fstr._fstrs:
-                self._fstrs.insert(0, fs)
-        return self
-
-    def __len__(self) -> int:
-        len = 0
-        for str in self._fstrs:
-            len += str.__len__()
-        return len
-
-    def __str__(self) -> str:
-        ret = ''
-        for str in self._fstrs:
-            ret += str.__str__()
+class ansi_stream:
+    @overload
+    def __init__(self, strs: None) -> None:
+        ...
+    
+    @overload
+    def __init__(self, astr: ansi_str) -> None:
+        ...
+    
+    @overload
+    def __init__(self, astrs: Iterable[ansi_str]) -> None:
+        ...
+    
+    @overload
+    def __init__(self, stream: 'ansi_stream') -> None:
+        ...
+    
+    def __init__(self, strs: Union[None, ansi_str, Iterable[ansi_str], 'ansi_stream'] = None) -> None:
+        self._astrs: list[ansi_str] = []
+        if  isinstance(strs, ansi_str):
+            self._astrs.append(strs)
+        elif isinstance(strs, ansi_stream):
+            for astr in strs._astrs:
+                self._astrs.append(astr.copy())
+        elif isinstance(strs, Iterable):
+            for astr in strs:
+                if not isinstance(astr, ansi_str):
+                    raise ValueError('Unknown str type.')
+                self._astrs.append(astr.copy())
+    
+    def copy(self) -> 'ansi_stream':
+        ret = ansi_stream()
+        for astr in self._astrs:
+            ret._astrs.append(astr)
         return ret
     
-    def __iter__(self) -> 'fstrs':
-        self._ptr  = 0
-        self._text = ''
-        for fstr in self._fstrs:
-            self._text += fstr.text
-        return self
+    def plain_str(self) -> str:
+        return ''.join(astr.str for astr in self._astrs)
     
-    def __next__(self) -> str:
-        if self._ptr >= self._text.__len__():
-            raise StopIteration
-        self._ptr += 1
-        return self._text[self._ptr - 1]
+    def __str__(self) -> str:
+        return ''.join(astr.__str__() for astr in self._astrs)
+    
+    def __len__(self) -> int:
+        return sum([astr.__len__() for astr in self._astrs])
+    
+    def __iter__(self):
+        return iter(''.join(astr._str for astr in self._astrs))
+    
+    def __add__(self, other: Union[str, ansi_str, 'ansi_stream']) -> 'ansi_stream':
+        ret = self.copy()
+        if isinstance(other, str):
+            ret._astrs.append(ansi_str(other, ansi_format()))
+            return ret
+        if isinstance(other, ansi_str):
+            ret._astrs.append(other)
+            return ret
+        if isinstance(other, ansi_stream):
+            for astr in other._astrs:
+                ret._astrs.append(astr)
+            return ret
+    
+    def __radd__(self, other: Union[str, ansi_str, 'ansi_stream']) -> 'ansi_stream':
+        if isinstance(other, str):
+            ret = self.copy()
+            ret._astrs.insert(0, ansi_str(other, ansi_format()))
+            return ret
+        if isinstance(other, ansi_str):
+            ret = self.copy()
+            ret._astrs.insert(0, other)
+            return ret
+        if isinstance(other, ansi_stream):
+            ret = other.copy()
+            for astr in self._astrs:
+                ret._astrs.append(astr)
+            return ret
+    
+    def __getitem__(self, index) -> str:
+        for astr in self._astrs:
+            if 0 <= index < astr.__len__():
+                return astr[index]
+            index -= astr.__len__()
+        raise IndexError('Index out of range.')
 
-def clear_all():
-    print(f'{format.CONTROL_CODE}2J', end='')
-    print(f'{format.CONTROL_CODE}1;1H', end='')
-
-def clear_line():
-    print(f'{format.CONTROL_CODE}2K', end='')
-    print(f'{format.CONTROL_CODE}H', end='')
-
-def upper_line():
-    print('\033[1A', end='')
+FORMAT_VALUE   = ansi_format(foreground=color.CYAN)
+FORMAT_TITLE   = ansi_format(style.BOLD, color.WHITE)
+FORMAT_ERROR   = ansi_format(foreground=color.RED)
+FORMAT_SUCCESS = ansi_format(foreground=color.GREEN)
+FORMAT_PS      = ansi_format(style=style.FAINT)
+FORMAT_OPTION  = ansi_format(foreground=color.YELLOW)
+FORMAT_ANNO    = ansi_format(style.ITALIC | style.FAINT)

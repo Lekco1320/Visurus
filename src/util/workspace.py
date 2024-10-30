@@ -1,18 +1,16 @@
 import os
-import util.ansi as ansi
-import util.menu as menu
-import util.printer as prt
 import tkinter as tk
 
-from util.errhandler import errhandler
-from util.image import image
+from util import *
+from util import menu
+
 from PIL import Image
 from PIL import ImageTk
 
 SUPPORTED = ['.jpg', '.jpeg', '.png', '.bmp', '.gif','.ico', '.psd', '.webp', '.tif', '.tiff']
 
-images : list[image] = []
-dir    : str         = ''
+images: list[image] = []
+dir: str         = ''
 
 def main():
     m = menu.menu('Lekco Visurus - 工作区', 'Q')
@@ -24,15 +22,15 @@ def main():
     m.run()
 
 def display():
-    prt.left(f'已导入 {len(images)} 张图像:')
+    print_left(f'已导入 {len(images)} 张图像:')
     for i in range(len(images)):
-        prt.left(f'{i + 1}. ' + images[i].formated_name())
-    prt.split()
+        print_left(f'{i + 1}. ' + images[i].formated_name())
+    print_spliter()
 
 def check_space() -> bool:
     ret = len(images) > 0
     if not ret:
-        prt.error('工作区为空.')
+        print_error('工作区为空.')
     return ret
 
 @errhandler
@@ -40,20 +38,20 @@ def choose() -> list:
     if not check_space():
         return
     
-    prt.output('请选择目标图像:')
-    prt.ps('请用空格隔开多个索引')
-    prt.ps('空输入默认全选')
-    ans = list(map(int, prt.input().split()))
+    print_output('请选择目标图像:')
+    print_ps('请用空格隔开多个索引')
+    print_ps('空输入默认全选')
+    ans = list(map(int, get_input().split()))
     if len(ans) == 0:
-        ansi.upper_line()
-        prt.output(' '.join([str(i) for i in range(1, len(images) + 1)]))
+        up_line()
+        print_output(' '.join([str(i) for i in range(1, len(images) + 1)]))
         return [i for i in range(1, len(images) + 1)]
     for i in ans:
         if i <= 0 or i > len(images):
             raise IndexError(f'\'{i}\' 超出索引范围.')
     return ans
 
-def get(id : int) -> image:
+def get(id: int) -> image:
     return images[id]
 
 def input_main():
@@ -64,7 +62,7 @@ def input_main():
     m.add(menu.option('Q', '返回'))
     m.run()
 
-def access_check(path : str) -> bool:
+def access_check(path: str) -> bool:
     if '$RECYCLE.BIN' in path:
         return False
     try:
@@ -75,22 +73,22 @@ def access_check(path : str) -> bool:
 
 @errhandler
 def input_files():
-    prt.output('请输入图像文件路径')
-    prt.ps('多个路径请用 | 分隔.')
-    list = prt.input().split('|')
+    print_output('请输入图像文件路径')
+    print_ps('多个路径请用 | 分隔.')
+    list = get_input().split('|')
     for path in list:
         input_file(path)
 
 @errhandler
 def input_folders():
-    prt.output('请输入图像文件路径')
-    prt.ps('多个路径请用 | 分隔. 包含子文件夹.')
-    list = prt.input().split('|')
+    print_output('请输入图像文件路径')
+    print_ps('多个路径请用 | 分隔. 包含子文件夹.')
+    list = get_input().split('|')
     for path in list:
         input_folder(path)
 
 @errhandler
-def input_file(path : str):
+def input_file(path: str):
     path = path.replace('"', '').strip()
     _, extension = os.path.splitext(path)
     if extension.lower() in SUPPORTED:
@@ -98,7 +96,7 @@ def input_file(path : str):
             images.append(image(path))
 
 @errhandler
-def input_folder(path : str):
+def input_folder(path: str):
     path = path.replace('"', '').strip()
     for root, dirs, files in os.walk(path):
         for file in files:
@@ -106,7 +104,7 @@ def input_folder(path : str):
             input_file(file_path)
 
 @errhandler
-def input_file_or_folder(path : str):
+def input_file_or_folder(path: str):
     path = path.replace('"', '').strip()
     if   os.path.isdir(path):
         input_folder(path)
@@ -131,7 +129,7 @@ def remove_main():
     for id in to_remove:
         del images[id - 1]
 
-def image_window(img : Image.Image, name : str):
+def image_window(img: Image.Image, name: str):
     root = tk.Tk()
     root.title(name)
     swidth  = root.winfo_screenwidth()  * 0.8
@@ -157,17 +155,17 @@ def show_main():
         with Image.open(images[id - 1].path) as img:
             image_window(img, images[id - 1].name)
 
-chosen : list[image] = []
+chosen: list[image] = []
 
 def c_init():
     global chosen
     chosen.clear()
 
 def c_display():
-    prt.left(f'已选择 {len(chosen)} 张图像:')
+    print_left(f'已选择 {len(chosen)} 张图像:')
     for i in range(len(chosen)):
-        prt.left(f'{i + 1}. ' + chosen[i].formated_name())
-    prt.split()
+        print_left(f'{i + 1}. ' + chosen[i].formated_name())
+    print_spliter()
 
 def c_main() -> list:
     c_init()

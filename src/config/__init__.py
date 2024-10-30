@@ -1,11 +1,21 @@
-import util.menu as menu
-import util.printer as prt
+import os
+import sys
+import ast
+import shutil
+import platform
+import resources
 
-from config.info import info
-from config.config import *
+from util import *
+from util import menu
+from pathlib import Path
 
-infos : list[info] = []
-has_inited  : bool = False
+from .info import info
+
+CONFIG_FILE: Path = None
+
+infos: list[info] = []
+has_inited: bool  = False
+Config: dict[str, wrapper] = {}
 
 def main():
     init()
@@ -25,9 +35,9 @@ def main():
 
 def reset():
     default()
-    prt.success('首选项已恢复至默认值.')
+    print_success('首选项已恢复至默认值.')
 
-def category_main(category : str):
+def category_main(category: str):
     m = menu.menu(f'Lekco Visurus - {category}', 'Q')
     m.add(menu.splitter('- 默认值 -'))
     all = [i for i in infos if i.category == category]
@@ -43,13 +53,13 @@ def init():
     if has_inited:
         return
     
-    import util.output as output
-    import util.stitching as stitching
-    import format.species_label as species_label
-    import format.photo_params as photo_params
-    import format.shadow as shadow
-    import format.round_corner as round_corner
-    import watermark.style as watermark
+    from util import output
+    from util import stitching
+    from format import species_label
+    from format import photo_params
+    from format import shadow
+    from format import round_corner
+    from watermark import style as watermark
     
     infos = [
         info('导出设置', '导出路径',        'output.ddir', 'A1', output.d_main, output.d_value),
@@ -89,3 +99,104 @@ def init():
     ]
     
     has_inited = True
+
+def check_current_config(current_folder: str):
+    global CONFIG_FILE
+    current_config = Path(current_folder) / 'config.ini'
+    if not os.path.isfile(current_config):
+        if CONFIG_FILE == None:
+            config.default()
+            config.save()
+        return
+    app_config = CONFIG_FILE
+    CONFIG_FILE = current_config
+    if not app_config.exists():
+        shutil.copy(CONFIG_FILE, app_config)
+
+def check_app_config():
+    global CONFIG_FILE
+    system = platform.system()
+    if system == "Windows":
+        app_config = Path(os.getenv('APPDATA')) / "Lekco" / "visurus" / 'config.ini'
+    elif system in ["Linux", "Darwin"]:
+        app_config = Path.home() / ".config" / "Lekco" / "visurus" / 'config.ini'
+    CONFIG_FILE = app_config
+
+def check():
+    check_app_config()
+    check_current_config(os.path.dirname(sys.argv[0]))
+
+def default():
+    global Config
+    Config = {
+        'output.ddir'                : wrapper(os.path.join(os.path.expanduser('~'), 'Desktop')),
+        'output.fformat'             : wrapper('*.PNG'),
+        'species_label.size'         : wrapper('2K'),
+        'species_label.enshadow'     : wrapper(False),
+        'species_label.encorner'     : wrapper(False),
+        'species_label.enwatermark'  : wrapper(False),
+        'shadow.color'               : wrapper('#0000007F'),
+        'shadow.offset'              : wrapper((10, 10)),
+        'shadow.blur'                : wrapper(5),
+        'shadow.limit'               : wrapper((8, 8)),
+        'watermark.content'          : wrapper('文字'),
+        'watermark.font'             : wrapper(resources.font.TIMES_REGULAR),
+        'watermark.color'            : wrapper('#0000007F'),
+        'watermark.text'             : wrapper('Lekco'),
+        'watermark.psource'          : wrapper('无'),
+        'watermark.opacity'          : wrapper(100),
+        'watermark.aligns'           : wrapper(['居中对齐', '底部对齐']),
+        'watermark.scale'            : wrapper(['固定尺寸', ('*', '*')]),
+        'watermark.position'         : wrapper('图像下中央'),
+        'watermark.offset'           : wrapper((0, 0)),
+        'photo_params.size'          : wrapper('2K'),
+        'photo_params.enshadow'      : wrapper(False),
+        'photo_params.enwatermark'   : wrapper(False),
+        'photo_params.typeset'       : wrapper('底部双侧标注'),
+        'photo_params.bottom_side'   : wrapper(['{B}', '{D}', '{L} {F} {E} {I}', '{T}']),
+        'photo_params.bottom_center' : wrapper(['Shot on ', '{D} ', '{M} ', '{L} {F} {E} {I}']),
+        'photo_params.back_blur'     : wrapper(['{D}', '{L} {F} {E} {I}', 50, 0.45]),
+        'round_corner.radius'        : wrapper(10),
+        'stitching.direction'        : wrapper('垂直方向'),
+        'stitching.clip'             : wrapper('扩展至最长边'),
+        'stitching.halign'           : wrapper('左对齐'),
+        'stitching.valign'           : wrapper('顶部对齐'),
+        'stitching.spacing'          : wrapper(0),
+        'stitching.background'       : wrapper('#FFFFFFFF'),
+    }
+
+def eval(line: str) -> tuple | None:
+    key = ''
+    value = ''
+    meet_equal = False
+    for c in line:
+        if c == '=':
+            meet_equal = True
+        elif not meet_equal:
+            key += c
+        else:
+            value += c
+    value = value.strip()
+    if meet_equal:
+        return (key.strip(), ast.literal_eval(value))
+
+def read():
+    global Config
+    with open(CONFIG_FILE, 'r', encoding='utf-8') as file:
+        for line in file:
+            ret = eval(line)
+            if ret != None:
+                Config[ret[0]] = wrapper(ret[1])
+
+def to_str(pair: tuple) -> str:
+    value = f'R\'{pair[1].data}\'' if isinstance(pair[1].data, str) else pair[1].data
+    return f'{pair[0]} = {value}\n'
+
+def save():
+    with open(CONFIG_FILE, 'w', encoding='utf-8') as file:
+        for pair in Config.items():
+            file.write(to_str(pair))
+
+check()
+default()
+read()

@@ -1,12 +1,12 @@
 import os
-import util.ansi as ansi
 
+from util import ansi
 from PIL import Image
 from PIL.ExifTags import Base
 from datetime import datetime
 
 class image:
-    def __init__(self, path : str) -> None:
+    def __init__(self, path: str) -> None:
         self._path = path
         self._dir  = os.path.dirname(path)
         self._name = os.path.basename(path)
@@ -72,10 +72,10 @@ class image:
         return formatfunc(value) if value != None else default
     
     def formated_name(self):
-        return self._name + ansi.fstr(f' @{self._width}x{self._height}', ansi.format(ansi.style.ITALIC | ansi.style.FAINT))
+        return self._name + ansi.ansi_str(f' @{self._width}x{self._height}', ansi.FORMAT_ANNO)
 
 class outimage:
-    def __init__(self, new : Image.Image, src : image = None):
+    def __init__(self, new: Image.Image, src: image = None):
         self._img    = new
         self._width  = new.width
         self._height = new.height
@@ -97,8 +97,8 @@ class outimage:
     def name(self):
         return self._name
     
-    def convert(self, mode : str):
+    def convert(self, mode: str):
         self._img = self._img.convert(mode)
     
     def formated_name(self):
-        return self._name + ansi.fstr(f' @{self._width}x{self._height}', ansi.format(ansi.style.ITALIC | ansi.style.FAINT))
+        return self._name + ansi.ansi_str(f' @{self._width}x{self._height}', ansi.FORMAT_ANNO)

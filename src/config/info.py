@@ -1,9 +1,8 @@
-import util.printer as prt
-
-from config.config import Config
+from config import *
+from util import *
 
 class info:
-    def __init__(self, category : str, name : str, key : str, menukey : str, setter, getter = None) -> None:
+    def __init__(self, category: str, name: str, key: str, menukey: str, setter, getter = None) -> None:
         self._category = category
         self._name     = name
         self._key      = key
@@ -37,6 +36,6 @@ class info:
     
     def show(self):
         if callable(self._getter):
-            prt.pkv(self._name, self.get())
+            print_kv(self._name, self.get())
         else:
-            prt.left(f'{self._name}:…')
+            print_left(f'{self._name}:…')

@@ -1,26 +1,23 @@
-import util.printer as prt
-import util.ansi as ansi
-import util.menu as menu
-import util.workspace as workspace
+from util import *
+from util import menu
+from util import workspace
+
 import os
 
-from util.wrapper import wrapper
-from util.errhandler import errhandler
-from util.image import outimage
-from config.main import Config
+from config import Config
 
-images : list[outimage] = []
-chosen : list[int]      = []
+images: list[outimage] = []
+chosen: list[int]      = []
 
 ddir    = wrapper(Config['output.ddir'])
 fformat = wrapper(Config['output.fformat'])
 
-def init(imgs : list[outimage]):
+def init(imgs: list[outimage]):
     global images, chosen
     images = imgs
     chosen = list(range(1, len(images) + 1))
 
-def main(imgs : list[outimage]):
+def main(imgs: list[outimage]):
     init(imgs)
     
     m = menu.menu('Lekco Visurus - 导出设置', 'Q')
@@ -34,15 +31,15 @@ def main(imgs : list[outimage]):
     m.run()
 
 def display():
-    prt.left(f'导出源含有 {len(images)} 张图像:')
+    print_left(f'导出源含有 {len(images)} 张图像:')
     for i in range(len(images)):
-        prt.left(f'{i + 1}. ' + images[i].formated_name())
-    prt.split()
+        print_left(f'{i + 1}. ' + images[i].formated_name())
+    print_spliter()
 
 def check_space() -> bool:
     ret = len(images) > 0
     if not ret:
-        prt.error('[错误] 导出源为空.')
+        print_error('[错误] 导出源为空.')
     return ret
 
 @errhandler
@@ -51,13 +48,13 @@ def choose() -> list[int]:
         return
     
     while True:
-        prt.output('请选择目标图像:')
-        prt.ps('请用空格隔开多个索引')
-        prt.ps('空输入默认全选')
-        ans = list(map(int, prt.input().split()))
+        print_output('请选择目标图像:')
+        print_ps('请用空格隔开多个索引')
+        print_ps('空输入默认全选')
+        ans = list(map(int, get_input().split()))
         if len(ans) == 0:
-            ansi.upper_line()
-            prt.output(' '.join([str(i) for i in range(1, len(images) + 1)]))
+            up_line()
+            print_output(' '.join([str(i) for i in range(1, len(images) + 1)]))
             return [i for i in range(1, len(images) + 1)]
         else:
             for i in ans:
@@ -79,7 +76,7 @@ def p_main():
 def p_value() -> str:
     return chosen.__str__()
 
-def d_main(ddir : wrapper):
+def d_main(ddir: wrapper):
     m = menu.menu('Lekco Visurus - 导出内容')
     m.add(menu.option('O', '导出至源路径', lambda: dsource(ddir)))
     m.add(menu.option('D', '导出至硬盘',   lambda: ddisk(ddir)))
@@ -87,21 +84,21 @@ def d_main(ddir : wrapper):
     m.add(menu.option('Q', '返回'))
     m.run()
 
-def ddisk(ddir : wrapper):
+def ddisk(ddir: wrapper):
     from tkinter import filedialog
-    prt.output('请选择目标路径:')
+    print_output('请选择目标路径:')
     ddir.data = filedialog.askdirectory()
 
-def dsource(ddir : wrapper):
+def dsource(ddir: wrapper):
     ddir.data = '源路径'
 
-def dworkplace(ddir : wrapper):
+def dworkplace(ddir: wrapper):
     ddir.data = '工作区'
 
-def d_value(ddir : wrapper) -> str:
+def d_value(ddir: wrapper) -> str:
     return ddir.data
 
-def f_main(fformat : wrapper):
+def f_main(fformat: wrapper):
     m = menu.menu('Lekco Visurus - 导出格式')
     m.add(menu.option('J', '*.JPG', lambda: fjpg(fformat)))
     m.add(menu.option('P', '*.PNG', lambda: fpng(fformat)))
@@ -110,23 +107,23 @@ def f_main(fformat : wrapper):
     m.add(menu.option('Q', '返回'))
     m.run()
 
-def fjpg(fformat : wrapper):
+def fjpg(fformat: wrapper):
     fformat.data = '*.JPG'
 
-def fpng(fformat : wrapper):
+def fpng(fformat: wrapper):
     fformat.data = '*.PNG'
 
-def fbmp(ffmort : wrapper):
+def fbmp(ffmort: wrapper):
     fformat.data = '*.BMP'
 
-def fgif(fformat : wrapper):
+def fgif(fformat: wrapper):
     fformat.data = '*.GIF'
 
-def f_value(fformat : wrapper) -> str:
+def f_value(fformat: wrapper) -> str:
     return fformat.data
 
 def output():
-    prt.output('正在导出图像...')
+    print_output('正在导出图像...')
     extension = fformat.data[1:].lower()
     for i in chosen:
         dir  = ddir.data
@@ -138,5 +135,5 @@ def output():
         if extension == '.jpg' and images[i - 1].img.mode == 'RGBA':
             images[i - 1].convert('RGB')
         images[i - 1].img.save(path)
-        prt.success(f'{images[i - 1].name} 导出成功.')
-    prt.wait()
+        print_success(f'{images[i - 1].name} 导出成功.')
+    wait()
