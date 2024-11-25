@@ -21,15 +21,16 @@ from format import shadow
 
 targets: list[image] = []
 out: list[outimage]  = []
-size                 = wrapper(Config['photo_params.size'])
-enshadow             = wrapper(Config['photo_params.enshadow'])
-enwatermark          = wrapper(Config['photo_params.enwatermark'])
-typeset              = wrapper(Config['photo_params.typeset'])
-bottom_side          = wrapper(Config['photo_params.bottom_side'])
-bottom_center        = wrapper(Config['photo_params.bottom_center'])
-back_blur            = wrapper(Config['photo_params.back_blur'])
-width                = { '1080P' : 1920, '2K' : 2560, '4K' : 3840 }
-info                 = None
+
+size          = wrapper(Config['photo_params.size'])
+enshadow      = wrapper(Config['photo_params.enshadow'])
+enwatermark   = wrapper(Config['photo_params.enwatermark'])
+typeset       = wrapper(Config['photo_params.typeset'])
+bottom_side   = wrapper(Config['photo_params.bottom_side'])
+bottom_center = wrapper(Config['photo_params.bottom_center'])
+back_blur     = wrapper(Config['photo_params.back_blur'])
+width         = { '1080P' : 1920, '2K' : 2560, '4K' : 3840 }
+info          = None
 
 #endregion
 
@@ -86,6 +87,7 @@ def display(image: image):
 
 #region 拍摄参数
 
+@history('photo_params.make')
 def set_make():
     print_output('请输入相机制造商:')
     info[Base.Make] = get_input()
@@ -93,6 +95,7 @@ def set_make():
 def get_make() -> str:
     return info[Base.Make]
 
+@history('photo_params.model')
 def set_model():
     print_output('请输入相机型号:')
     info[Base.Model] = get_input()
@@ -100,6 +103,7 @@ def set_model():
 def get_model() -> str:
     return info[Base.Model]
 
+@history('photo_params.lens_model')
 def set_lens_model():
     print_output('请输入镜头型号:')
     info[Base.LensModel] = get_input()
@@ -107,6 +111,7 @@ def set_lens_model():
 def get_lens_model() -> str:
     return info[Base.LensModel]
 
+@history('photo_params.focal_length')
 def set_focal_len():
     print_output('请输入焦距:')
     info[Base.FocalLength] = get_input()
@@ -114,6 +119,7 @@ def set_focal_len():
 def get_focal_len() -> str:
     return info[Base.FocalLength]
 
+@history('photo_params.exposure_time')
 def set_exposure_time():
     print_output('请输入曝光时间:')
     info[Base.ExposureTime] = get_input()
@@ -121,6 +127,7 @@ def set_exposure_time():
 def get_exposure_time() -> str:
     return info[Base.ExposureTime]
 
+@history('photo_params.fnumber')
 def set_fnumber():
     print_output('请输入光圈值:')
     info[Base.FNumber] = get_input()
@@ -128,6 +135,7 @@ def set_fnumber():
 def get_fnumber() -> str:
     return info[Base.FNumber]
 
+@history('photo_params.iso')
 def set_iso():
     print_output('请输入ISO值:')
     info[Base.ISOSpeedRatings] = get_input()

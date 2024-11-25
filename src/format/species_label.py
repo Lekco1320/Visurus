@@ -14,6 +14,7 @@ from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
 
+from datetime import datetime
 from config import Config
 
 #region 变量
@@ -37,7 +38,7 @@ def default():
     latin_name    = ''
     gender        = '未知'
     location      = ''
-    date          = ''
+    date          = datetime.today().strftime('%Y.%m.%d')
 
 #endregion
 
@@ -83,6 +84,7 @@ def choose_targets():
 
 #region 物种名
 
+@history('species_label.species_name')
 def set_species_name():
     print_output('请输入物种名:')
     print_ps('用半角括号括住拼音')
@@ -96,6 +98,7 @@ def get_species_name() -> str:
 
 #region 拉丁学名
 
+@history('species_label.latin_name')
 def set_latin_name():
     print_output('请输入拉丁学名:')
     global latin_name
@@ -134,6 +137,7 @@ def g_value() -> str:
 #endregion
 
 #region 日期
+
 def set_date():
     print_output('请输入日期:')
     global date
@@ -146,6 +150,7 @@ def get_date() -> str:
 
 #region 地点
 
+@history('species_label.location')
 def set_location():
     print_output('请输入地点:')
     global location

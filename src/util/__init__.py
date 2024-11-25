@@ -4,6 +4,7 @@ from .printer import *
 from .image import image
 from .image import outimage
 from .color import color
+from .history import history
 
 __all__ = [
     "errhandler",
@@ -32,5 +33,6 @@ __all__ = [
     "print_error",
     "print_success",
     "compress_path",
-    "SPLITER_LENGTH"
+    "SPLITER_LENGTH",
+    "history"
 ]
