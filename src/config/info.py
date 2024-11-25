@@ -1,4 +1,5 @@
-from config import *
+import config
+
 from util import *
 
 class info:
@@ -27,11 +28,11 @@ class info:
         return self._menukey
     
     def set(self):
-        self._setter(Config[self._key])
+        self._setter(config.Config[self._key])
     
     def get(self):
         if callable(self._getter):
-            return self._getter(Config[self._key])
+            return self._getter(config.Config[self._key])
         return None
     
     def show(self):

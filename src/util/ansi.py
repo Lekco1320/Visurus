@@ -1,5 +1,6 @@
 from enum import Enum
 from enum import Flag
+
 from typing import *
 
 class color(Enum):

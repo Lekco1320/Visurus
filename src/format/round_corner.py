@@ -8,8 +8,8 @@ from PIL import ImageDraw
 
 from config import Config
 
-targets = []
-radius  = wrapper(Config['round_corner.radius'])
+targets: list[image] = []
+radius               = wrapper(Config['round_corner.radius'])
 
 def main():
     targets.clear()
@@ -17,8 +17,8 @@ def main():
     m = menu.menu('Lekco Visurus - 圆角效果', 'Q')
     m.add(menu.display(display))
     m.add(menu.option('C', '选择目标图像…', choose_targets))
-    m.add(menu.option('R', '圆角半径', lambda: set_radius(radius), lambda: get_radius(radius)))
-    m.add(menu.option('O', '执行导出…', execute))
+    m.add(menu.option('R', '圆角半径',      lambda: set_radius(radius), lambda: get_radius(radius)))
+    m.add(menu.option('O', '执行导出…',     execute))
     m.add(menu.option('Q', '返回'))
     m.run()
 

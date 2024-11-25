@@ -3,14 +3,12 @@ import tkinter as tk
 
 from util import *
 from util import menu
-
-from PIL import Image
-from PIL import ImageTk
+from PIL  import Image
+from PIL  import ImageTk
 
 SUPPORTED = ['.jpg', '.jpeg', '.png', '.bmp', '.gif','.ico', '.psd', '.webp', '.tif', '.tiff']
 
 images: list[image] = []
-dir: str         = ''
 
 def main():
     m = menu.menu('Lekco Visurus - 工作区', 'Q')
@@ -50,9 +48,6 @@ def choose() -> list:
         if i <= 0 or i > len(images):
             raise IndexError(f'\'{i}\' 超出索引范围.')
     return ans
-
-def get(id: int) -> image:
-    return images[id]
 
 def input_main():
     m = menu.menu('Lekco Visurus - 导入图像')

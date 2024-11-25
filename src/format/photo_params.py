@@ -7,8 +7,6 @@ from util import ansi
 from util import output
 from util import workspace
 
-from format import shadow
-
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
@@ -17,6 +15,7 @@ from PIL import ImageEnhance
 from PIL.ExifTags import Base
 
 from config import Config
+from format import shadow
 
 #region 变量
 
@@ -282,10 +281,10 @@ def bottom_center_main(param: wrapper):
 def blur_main(param: wrapper):
     m = menu.menu('Lekco Visurus - 排版参数', 'Q')
     m.add(menu.display(param_display))
-    m.add(menu.option('A', '第一行文本',   lambda: param_set(param, 0),    lambda: param.data[0]))
-    m.add(menu.option('B', '第二行文本',   lambda: param_set(param, 1),    lambda: param.data[1]))
-    m.add(menu.option('R', '背景模糊程度', lambda: blur_set_blur(param),   lambda: param.data[2].__str__()))
-    m.add(menu.option('I', '背景亮度',     lambda: blur_set_brightness(param),   lambda: f'{param.data[3] * 100}%'))
+    m.add(menu.option('A', '第一行文本',   lambda: param_set(param, 0),        lambda: param.data[0]))
+    m.add(menu.option('B', '第二行文本',   lambda: param_set(param, 1),        lambda: param.data[1]))
+    m.add(menu.option('R', '背景模糊程度', lambda: blur_set_blur(param),       lambda: param.data[2].__str__()))
+    m.add(menu.option('I', '背景亮度',     lambda: blur_set_brightness(param), lambda: f'{param.data[3] * 100}%'))
     m.add(menu.option('Q', '返回'))
     m.run()
 

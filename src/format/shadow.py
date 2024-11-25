@@ -1,6 +1,5 @@
 from util import *
 from util import menu
-from util import color
 from util import output
 from util import workspace
 
@@ -64,7 +63,7 @@ def set_color(shadow: wrapper):
     shadow.data = color.input().hex
 
 def get_color(shadow: wrapper) -> str:
-    return shadow.data
+    return shadow.data.__str__()
 
 @errhandler
 def set_offset(offset: wrapper):

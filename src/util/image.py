@@ -1,8 +1,11 @@
 import os
 
+from util import *
 from util import ansi
-from PIL import Image
+
+from PIL          import Image
 from PIL.ExifTags import Base
+
 from datetime import datetime
 
 class image:
@@ -71,8 +74,9 @@ class image:
         value = data.get(key, None)
         return formatfunc(value) if value != None else default
     
-    def formated_name(self):
-        return self._name + ansi.ansi_str(f' @{self._width}x{self._height}', ansi.FORMAT_ANNO)
+    def formated_name(self) -> ansi.ansi_stream:
+        return compress_path(self._path, SPLITER_LENGTH - text_width('* xx.  @0000x0000 *')) + \
+               ansi.ansi_str(f' @{self._width}x{self._height}', ansi.FORMAT_ANNO)
 
 class outimage:
     def __init__(self, new: Image.Image, src: image = None):
@@ -97,8 +101,9 @@ class outimage:
     def name(self):
         return self._name
     
-    def convert(self, mode: str):
+    def convert(self, mode: str) -> None:
         self._img = self._img.convert(mode)
     
-    def formated_name(self):
-        return self._name + ansi.ansi_str(f' @{self._width}x{self._height}', ansi.FORMAT_ANNO)
+    def formated_name(self) -> ansi.ansi_stream:
+        return compress_path(self._name, SPLITER_LENGTH - text_width('* xx.  @0000x0000 *')) + \
+               ansi.ansi_str(f' @{self._width}x{self._height}', ansi.FORMAT_ANNO)

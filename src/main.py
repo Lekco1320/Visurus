@@ -1,4 +1,5 @@
-# Lekco Visurus. 2024.5.23.
+# Lekco Visurus
+# Lukaß Zhang, 2024/05/23
 
 import sys
 import format
