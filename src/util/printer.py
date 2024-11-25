@@ -1,7 +1,8 @@
+import os
 import time
 import unicodedata
 
-from util import ansi
+from util   import ansi
 from typing import overload, Union
 
 FULL_CHAR_WIDTH = 2
@@ -151,6 +152,12 @@ def clear_screen():
     print(f'{ansi.ansi_format.CONTROL_CODE}2J',   end='')
     print(f'{ansi.ansi_format.CONTROL_CODE}1;1H', end='')
 
+def true_clear_screen(): 
+    if os.name == 'posix':
+        os.system('clear')
+    else: 
+        os.system('cls')
+
 def up_line():
     print('\033[1A', end='')
 
@@ -204,3 +211,27 @@ def print_error(ex: str):
 def print_success(text: str):
     print_output(ansi.ansi_str(text, ansi.FORMAT_SUCCESS))
     wait(1.0)
+
+def compress_path(path: str, length: int) -> str:
+    path = os.path.normpath(path)
+    if text_width(path) <= length:
+        return path
+    
+    parts = path.split(os.sep)
+    ret   = path
+    
+    if len(parts) == 0:
+        return path
+    if len(parts) > 2: 
+        ret = os.path.join(parts[0], '...', parts[-1])
+    if len(parts) == 2 or text_width(ret) > length:
+        ret = os.path.join('...', parts[-1])
+    if text_width(ret) <= length:
+        return ret
+    if len(parts[-1]) <= 3:
+        return f'...{ret}'
+    
+    ret = parts[-1][3:]
+    while text_width(ret) + 3 > length: 
+        ret = ret[1:]
+    return f'...{ret}'

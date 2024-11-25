@@ -2,9 +2,8 @@ from util import *
 from util import menu
 from util import output
 from util import workspace
-from util import color
 
-from PIL import Image
+from PIL    import Image
 from config import Config
 
 targets    = []
@@ -21,8 +20,8 @@ def main():
     m.add(menu.splitter('- 拼接选项 -'))
     m.add(menu.option('D', '拼接方向', lambda: d_main(direction),          lambda: d_value(direction)))
     m.add(menu.option('L', '裁切模式', lambda: l_main(clip),               lambda: l_value(clip)))
-    m.add(menu.option('A', '对齐模式', lambda: ah_main(halign),            lambda: a_value(halign),    enfunc=lambda: direction.data == '垂直方向'))
-    m.add(menu.option('A', '对齐模式', lambda: av_main(valign),            lambda: a_value(valign),    enfunc=lambda: direction.data == '水平方向'))
+    m.add(menu.option('A', '对齐模式', lambda: ah_main(halign),            lambda: a_value(halign), enfunc=lambda: direction.data == '垂直方向'))
+    m.add(menu.option('A', '对齐模式', lambda: av_main(valign),            lambda: a_value(valign), enfunc=lambda: direction.data == '水平方向'))
     m.add(menu.option('P', '图像间距', lambda: set_spacing(spacing),       lambda: get_spacing(spacing)))
     m.add(menu.option('B', '背景颜色', lambda: set_background(background), lambda: get_background(background)))
     m.add(menu.splitter('- 导入与导出 -'))
@@ -199,7 +198,7 @@ def h_process(imgs: list[Image.Image]) -> Image.Image:
     else:
         height = clip.data
     width = sum(img.width for img in imgs) + (len(imgs) - 1) * spacing.data
-    back  = Image.new('RGBA', (width, height), color.color(background.data).tuple)
+    back  = Image.new('RGBA', (width, height), color(background.data).tuple)
     x     = 0
     for img in imgs:
         back.paste(img, (x, valign_pos(img.height, height)), img)
@@ -223,7 +222,7 @@ def v_process(imgs: list[Image.Image]) -> Image.Image:
     else:
         width = clip.data
     height = sum(img.height for img in imgs) + (len(imgs) - 1) * spacing.data
-    back   = Image.new('RGBA', (width, height), color.color(background.data).tuple)
+    back   = Image.new('RGBA', (width, height), color(background.data).tuple)
     y      = 0
     for img in imgs:
         back.paste(img, (halign_pos(img.width, back.width), y), img)

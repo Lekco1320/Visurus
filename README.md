@@ -1,7 +1,7 @@
-# visurus
+# Visurus
 
-> [![hugo-papermod](https://img.shields.io/badge/visurus-@Lekco-red)](https://github.com/Lekco1320/visurus)
-> [![release](https://img.shields.io/github/v/release/Lekco1320/visurus)](https://github.com/Lekco1320/visurus/releases)
+> [![hugo-papermod](https://img.shields.io/badge/Visurus-@Lekco-red)](https://github.com/Lekco1320/Visurus)
+> [![release](https://img.shields.io/github/v/release/Lekco1320/Visurus)](https://github.com/Lekco1320/Visurus/releases)
 > [![Apache License](https://img.shields.io/npm/l/echarts?color=green)](LICENSE)
 >
 > ***Visurus*** is the future participle form of the Latin verb ***videō*** (to see).
@@ -27,12 +27,12 @@
 ## 安装与使用
 ### Windows
 #### 使用打包的发行版本
-* 点击[Release](https://github.com/Lekco1320/visurus/releases)下载对应版本的压缩包`Lekco Visurus_win_x64.zip`。
+* 点击[Release](https://github.com/Lekco1320/Visurus/releases)下载对应版本的压缩包`Lekco Visurus_win_x64.zip`。
 * 解压到除系统盘外的任意磁盘下，双击运行`Lekco Visurus.exe`即可使用。
 
 #### 使用Python解释器
 * 请先确保具备Python环境(>=3.11)和pip工具。
-* 点击[Release](https://github.com/Lekco1320/visurus/releases)下载对应版本的压缩包`Source code.zip`或`Source code.tar.gz`。
+* 点击[Release](https://github.com/Lekco1320/Visurus/releases)下载对应版本的压缩包`Source code.zip`或`Source code.tar.gz`。
 * 解压到除系统盘外的任意磁盘下，使用终端打开文件夹`src`，执行以下命令以安装必要的依赖。
 ``` bat
 pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple

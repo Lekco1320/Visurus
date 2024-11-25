@@ -4,8 +4,8 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 
-from watermark import anchor
-from watermark import scaler
+from .anchor import anchor
+from .scaler import scaler
 
 class markbase(ABC):
     def __init__(self, anchor: anchor, scaler: scaler) -> None:

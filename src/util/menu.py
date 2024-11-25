@@ -3,6 +3,7 @@ from util import ansi
 
 from abc import ABC
 from abc import abstractmethod
+from typing import overload
 
 class item(ABC):
     def __init__(self, enfunc = None) -> None:
@@ -99,7 +100,7 @@ class display(item):
     
     def show(self):
         for item in self._content:
-            if   callable(item):
+            if callable(item):
                 item()
             else:
                 print_left(item.__str__())
@@ -128,6 +129,18 @@ class menu:
     def items(self):
         return self._items
     
+    @overload
+    def add(self, option: option) -> None: 
+        ...
+    
+    @overload
+    def add(self, splitter: splitter) -> None: 
+        ...
+    
+    @overload
+    def add(self, display: 'display') -> None: 
+        ...
+    
     def add(self, obj: item):
         if   isinstance(obj, option):
             self._items.append(obj)
@@ -143,7 +156,7 @@ class menu:
     
     def run(self):
         while self._flag:
-            clear_screen()
+            true_clear_screen()
             print_title(self._name)
             
             for display in self._display:
