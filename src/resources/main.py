@@ -1,10 +1,10 @@
 import os
 import sys
 import shutil
-import platform
 
 from enum import Enum
 from pathlib import Path
+from util import appdir
 
 RESOURCE_FOLDER: Path = None
 
@@ -25,12 +25,7 @@ class icon(Enum):
 
 def check_app_resource():
     global RESOURCE_FOLDER
-    system = platform.system()
-    if system == "Windows":
-        app_resource = Path(os.getenv('APPDATA')) / "Lekco" / "visurus" / 'resources'
-    elif system in ["Linux", "Darwin"]:
-        app_resource = Path.home() / ".config" / "Lekco" / "visurus" / 'resources'
-    RESOURCE_FOLDER = app_resource
+    RESOURCE_FOLDER = appdir.APPDIR / 'resources'
 
 def check_current_resource(current_folder: str):
     global RESOURCE_FOLDER
@@ -42,7 +37,21 @@ def check_current_resource(current_folder: str):
     app_resource = RESOURCE_FOLDER
     RESOURCE_FOLDER = current_resource
     if not app_resource.exists():
-        shutil.copytree(RESOURCE_FOLDER, app_resource)
+        shutil.copytree(RESOURCE_FOLDER, app_resource, ignore=ignore_files)
+
+def ignore_files(src, names):
+    ignore_dirs = { '__pycache__' }
+    ignore_suffixes = { '.py', '.pyc' }
+    ignored = set()
+    
+    for name in names:
+        full_path = os.path.join(src, name)
+        if os.path.isdir(full_path) and name in ignore_dirs:
+            ignored.add(name)
+        elif os.path.isfile(full_path) and os.path.splitext(name)[1] in ignore_suffixes:
+            ignored.add(name)
+    
+    return ignored
 
 def check():
     check_app_resource()
