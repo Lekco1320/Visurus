@@ -1,9 +1,9 @@
-from util import printer
+from .printer import print_error
 
 def errhandler(func):
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
         except Exception as ex:
-            printer.print_error(ex.args[0])
+            print_error(ex.args[0])
     return wrapper

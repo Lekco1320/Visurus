@@ -1,10 +1,10 @@
 from .errhandler import errhandler
-from .wrapper import wrapper
-from .printer import *
-from .image import image
-from .image import outimage
-from .color import color
-from .history import history
+from .wrapper    import wrapper
+from .printer    import *
+from .image      import image
+from .image      import outimage
+from .color      import color
+from .history    import history
 
 __all__ = [
     "errhandler",
@@ -34,5 +34,5 @@ __all__ = [
     "print_success",
     "compress_path",
     "SPLITER_LENGTH",
-    "history"
+    "history",
 ]

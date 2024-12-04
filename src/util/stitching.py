@@ -1,32 +1,36 @@
 from util import *
+from util import config
 from util import menu
 from util import output
 from util import workspace
 
-from PIL    import Image
-from config import Config
+from PIL import Image
 
-targets    = []
-direction  = wrapper(Config['stitching.direction'])
-clip       = wrapper(Config['stitching.clip'])
-halign     = wrapper(Config['stitching.halign'])
-valign     = wrapper(Config['stitching.valign'])
-spacing    = wrapper(Config['stitching.spacing'])
-background = wrapper(Config['stitching.background'])
+targets: list[image] = []
+
+CONFIG = config.get('stitching', {
+    'direction'  : '垂直方向',
+    'clip'       : '扩展至最长边',
+    'halign'     : '左对齐',
+    'valign'     : '顶部对齐',
+    'spacing'    : 0,
+    'background' : color('#FFFFFFFF')
+})
 
 def main():
     m = menu.menu('Lekco Visurus - 图像拼接', 'Q')
     m.add(menu.display(display))
     m.add(menu.splitter('- 拼接选项 -'))
-    m.add(menu.option('D', '拼接方向', lambda: d_main(direction),          lambda: d_value(direction)))
-    m.add(menu.option('L', '裁切模式', lambda: l_main(clip),               lambda: l_value(clip)))
-    m.add(menu.option('A', '对齐模式', lambda: ah_main(halign),            lambda: a_value(halign), enfunc=lambda: direction.data == '垂直方向'))
-    m.add(menu.option('A', '对齐模式', lambda: av_main(valign),            lambda: a_value(valign), enfunc=lambda: direction.data == '水平方向'))
-    m.add(menu.option('P', '图像间距', lambda: set_spacing(spacing),       lambda: get_spacing(spacing)))
-    m.add(menu.option('B', '背景颜色', lambda: set_background(background), lambda: get_background(background)))
+    m.add(menu.option('D', '拼接方向', d_main,         d_value))
+    m.add(menu.option('L', '裁切模式', l_main,         l_value))
+    m.add(menu.option('A', '对齐模式', ah_main,        a_value, enfunc=lambda: CONFIG.direction == '垂直方向'))
+    m.add(menu.option('A', '对齐模式', av_main,        a_value, enfunc=lambda: CONFIG.direction == '水平方向'))
+    m.add(menu.option('P', '图像间距', set_spacing,    get_spacing))
+    m.add(menu.option('B', '背景颜色', set_background, get_background))
     m.add(menu.splitter('- 导入与导出 -'))
     m.add(menu.option('C', '选择目标图像…', choose_targets))
     m.add(menu.option('S', '更变图像顺序',  change_order))
+    m.add(menu.option('Y', '保存当前设置',  lambda: config.save(CONFIG)))
     m.add(menu.option('O', '执行导出…',     execute))
     m.add(menu.option('Q', '返回'))
     m.run()
@@ -64,169 +68,169 @@ def change_order():
 
 #region 拼接方向
 
-def d_main(direction: wrapper):
+def d_main():
     m = menu.menu('Lekco Visurus - 拼接方向')
-    m.add(menu.option('H', '水平方向', lambda: d_horizion(direction)))
-    m.add(menu.option('V', '垂直方向', lambda: d_vertical(direction)))
+    m.add(menu.option('H', '水平方向', d_horizion))
+    m.add(menu.option('V', '垂直方向', d_vertical))
     m.add(menu.option('Q', '返回'))
     m.run()
 
-def d_horizion(direction: wrapper):
-    direction.data = '水平方向'
+def d_horizion():
+    CONFIG.direction = '水平方向'
 
-def d_vertical(direction: wrapper):
-    direction.data = '垂直方向'
+def d_vertical():
+    CONFIG.direction = '垂直方向'
 
-def d_value(direction: wrapper) -> str:
-    return direction.data
+def d_value() -> str:
+    return CONFIG.direction
 
 #endregion
 
 #region 裁切模式
 
-def l_main(clip: wrapper):
+def l_main():
     m = menu.menu('Lekco Visurus - 裁切模式')
-    m.add(menu.option('L', '扩展至最长边', lambda: l_longest(clip)))
-    m.add(menu.option('S', '裁切至最短边', lambda: l_shortest(clip)))
-    m.add(menu.option('C', '自定义',      lambda: l_custom(clip)))
+    m.add(menu.option('L', '扩展至最长边', l_longest))
+    m.add(menu.option('S', '裁切至最短边', l_shortest))
+    m.add(menu.option('C', '自定义',      l_custom))
     m.add(menu.option('Q', '返回'))
     m.run()
 
-def l_longest(clip: wrapper):
-    clip.data = '扩展至最长边'
+def l_longest():
+    CONFIG.clip = '扩展至最长边'
 
-def l_shortest(clip: wrapper):
-    clip.data = '裁切至最短边'
+def l_shortest():
+    CONFIG.clip = '裁切至最短边'
 
 @errhandler
-def l_custom(clip: wrapper):
+def l_custom():
     print_output('请输入裁切宽/高:')
     l = int(get_input())
     if l <= 0:
         raise ValueError(f'非法宽/高值 \'{l}\'.')
-    clip.data = l
+    CONFIG.clip = l
 
-def l_value(clip: wrapper) -> str:
-    if isinstance(clip.data, str):
-        return clip.data
-    return f'{clip.data}px'
+def l_value() -> str:
+    if isinstance(CONFIG.clip, str):
+        return CONFIG.clip
+    return f'{CONFIG.clip}px'
 
 #endregion
 
 #region 对齐模式
 
-def ah_main(halign: wrapper):
+def ah_main():
     m = menu.menu('Lekco Visurus - 对齐模式')
-    m.add(menu.option('L', '左对齐',   lambda: ah_left(halign)))
-    m.add(menu.option('C', '居中对齐', lambda: ah_center(halign)))
-    m.add(menu.option('R', '右对齐',   lambda: ah_right(halign)))
+    m.add(menu.option('L', '左对齐',   ah_left))
+    m.add(menu.option('C', '居中对齐', ah_center))
+    m.add(menu.option('R', '右对齐',   ah_right))
     m.add(menu.option('Q', '返回'))
     m.run()
 
-def ah_left(halign: wrapper):
-    halign.data = '左对齐'
+def ah_left():
+    CONFIG.halign = '左对齐'
 
-def ah_center(halign: wrapper):
-    halign.data = '居中对齐'
+def ah_center():
+    CONFIG.halign = '居中对齐'
 
-def ah_right(halign: wrapper):
-    halign.data = '右对齐'
+def ah_right():
+    CONFIG.halign = '右对齐'
 
-def av_main(valign: wrapper):
+def av_main():
     m = menu.menu('Lekco Visurus - 对齐模式')
-    m.add(menu.option('T', '顶部对齐', lambda: av_top(valign)))
-    m.add(menu.option('C', '居中对齐', lambda: av_center(valign)))
-    m.add(menu.option('B', '底部对齐', lambda: av_bottom(valign)))
+    m.add(menu.option('T', '顶部对齐', av_top))
+    m.add(menu.option('C', '居中对齐', av_center))
+    m.add(menu.option('B', '底部对齐', av_bottom))
     m.add(menu.option('Q', '返回'))
     m.run()
 
-def av_top(valign: wrapper):
-    valign.data = '顶部对齐'
+def av_top():
+    CONFIG.valign = '顶部对齐'
 
-def av_center(valign: wrapper):
-    valign.data = '居中对齐'
+def av_center():
+    CONFIG.valign = '居中对齐'
 
-def av_bottom(valign: wrapper):
-    valign.data = '底部对齐'
+def av_bottom():
+    CONFIG.valign = '底部对齐'
 
-def a_value(align: wrapper) -> str:
-    return align.data
+def a_value() -> str:
+    return CONFIG.valign
 
 #endregion
 
 #region 图像间距
 
 @errhandler
-def set_spacing(spacing: wrapper):
+def set_spacing():
     print_output('请输入图像间距:')
     ans = int(get_input())
     if ans < 0:
         raise ValueError(f'非法的图像间距 \'{ans}\'.')
-    spacing.data = ans
+    CONFIG.spacing = ans
 
-def get_spacing(spacing: wrapper) -> str:
-    return f'{spacing.data}px'
+def get_spacing() -> str:
+    return f'{CONFIG.spacing}px'
 
 #endregion
 
 #region 背景颜色
 
-def set_background(background: wrapper):
-    background.data = color.input().hex
+def set_background():
+    CONFIG.background = color.input()
 
-def get_background(background: wrapper) -> str:
-    return background.data
+def get_background() -> str:
+    return CONFIG.background.hex
 
 #endregion
 
 #region 图像处理
 
 def valign_pos(imgh: int, backh: int) -> int:
-    if   valign.data == '顶部对齐':
+    if   CONFIG.valign == '顶部对齐':
         return 0
-    elif valign.data == '居中对齐':
+    elif CONFIG.valign == '居中对齐':
         return int((backh - imgh) / 2)
     else:
         return backh - imgh
 
 def h_process(imgs: list[Image.Image]) -> Image.Image:
     height = 0
-    if   clip.data == '扩展至最长边':
+    if   CONFIG.clip == '扩展至最长边':
         height = max(img.height for img in imgs)
-    elif clip.data == '裁切至最短边':
+    elif CONFIG.clip == '裁切至最短边':
         height = min(img.height for img in imgs)
     else:
-        height = clip.data
-    width = sum(img.width for img in imgs) + (len(imgs) - 1) * spacing.data
-    back  = Image.new('RGBA', (width, height), color(background.data).tuple)
+        height = CONFIG.clip
+    width = sum(img.width for img in imgs) + (len(imgs) - 1) * CONFIG.spacing
+    back  = Image.new('RGBA', (width, height), CONFIG.background.tuple)
     x     = 0
     for img in imgs:
         back.paste(img, (x, valign_pos(img.height, height)), img)
-        x += img.width + spacing.data
+        x += img.width + CONFIG.spacing
     return back
 
 def halign_pos(imgw: int, backw: int) -> int:
-    if   halign.data == '左对齐':
+    if   CONFIG.halign == '左对齐':
         return 0
-    elif halign.data == '居中对齐':
+    elif CONFIG.halign == '居中对齐':
         return int((backw - imgw) / 2)
     else:
         return backw - imgw
 
 def v_process(imgs: list[Image.Image]) -> Image.Image:
     width = 0
-    if   clip.data == '扩展至最长边':
+    if   CONFIG.clip == '扩展至最长边':
         width = max(img.width for img in imgs)
-    elif clip.data == '裁切至最短边':
+    elif CONFIG.clip == '裁切至最短边':
         width = min(img.width for img in imgs)
     else:
-        width = clip.data
-    height = sum(img.height for img in imgs) + (len(imgs) - 1) * spacing.data
-    back   = Image.new('RGBA', (width, height), color(background.data).tuple)
+        width = CONFIG.clip
+    height = sum(img.height for img in imgs) + (len(imgs) - 1) * CONFIG.spacing
+    back   = Image.new('RGBA', (width, height), CONFIG.background.tuple)
     y      = 0
     for img in imgs:
         back.paste(img, (halign_pos(img.width, back.width), y), img)
-        y += img.height + spacing.data
+        y += img.height + CONFIG.spacing
     return back
 
 @errhandler
@@ -236,7 +240,7 @@ def execute():
     
     imgs = [img.image for img in targets]
     out  = None
-    if direction.data == '水平方向':
+    if CONFIG.direction == '水平方向':
         out = h_process(imgs)
     else:
         out = v_process(imgs)

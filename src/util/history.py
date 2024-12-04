@@ -1,11 +1,12 @@
 import pickle
 import readline
 
+from pathlib     import Path
 from .errhandler import errhandler
-from .appdir import APPDIR
+from .appdir     import APPDIR
 
-HISTORY_FILE = APPDIR / 'history.bin'
-histories = {}
+HISTORY_FILE: Path              = APPDIR / 'history.bin'
+histories: dict[str, list[str]] = {}
 
 @errhandler
 def read_history():
@@ -35,6 +36,12 @@ def save_distory(key: str):
             items.append(item)
     with open(HISTORY_FILE, 'wb') as file:
         pickle.dump(histories, file)
+
+def clear_history():
+    global histories
+    histories = {}
+    if HISTORY_FILE.exists():
+        HISTORY_FILE.unlink()
 
 def history(key: str):
     def decorator(func):

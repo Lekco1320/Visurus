@@ -1,8 +1,8 @@
 from util import *
 from util import ansi
 
-from abc import ABC
-from abc import abstractmethod
+from abc    import ABC
+from abc    import abstractmethod
 from typing import overload
 
 class item(ABC):

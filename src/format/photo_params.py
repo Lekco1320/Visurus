@@ -2,6 +2,7 @@ import watermark
 import resources
 
 from util import *
+from util import config
 from util import menu
 from util import ansi
 from util import output
@@ -14,7 +15,6 @@ from PIL import ImageFilter
 from PIL import ImageEnhance
 from PIL.ExifTags import Base
 
-from config import Config
 from format import shadow
 
 #region 变量
@@ -22,15 +22,19 @@ from format import shadow
 targets: list[image] = []
 out: list[outimage]  = []
 
-size          = wrapper(Config['photo_params.size'])
-enshadow      = wrapper(Config['photo_params.enshadow'])
-enwatermark   = wrapper(Config['photo_params.enwatermark'])
-typeset       = wrapper(Config['photo_params.typeset'])
-bottom_side   = wrapper(Config['photo_params.bottom_side'])
-bottom_center = wrapper(Config['photo_params.bottom_center'])
-back_blur     = wrapper(Config['photo_params.back_blur'])
-width         = { '1080P' : 1920, '2K' : 2560, '4K' : 3840 }
-info          = None
+CONFIG = config.get('photo_params', {
+    'size'          : '2K',
+    'shadow'        : False,
+    'watermark'     : False,
+    'wstyle'        : watermark.style.default(),
+    'typeset'       : '底部双侧标注',
+    'bottom_side'   : ['{B}', '{D}', '{L} {F} {E} {I}', '{T}'],
+    'bottom_center' : ['Shot on ', '{D} ', '{M} ', '{L} {F} {E} {I}'],
+    'back_blur'     : ['{D}', '{L} {F} {E} {I}', 50, 0.45],
+})
+
+width = { '1080P' : 1920, '2K' : 2560, '4K' : 3840 }
+info  = None
 
 #endregion
 
@@ -65,17 +69,18 @@ def single_main(image: image):
     m.add(menu.option('I', 'ISO值',      set_iso,           get_iso))
     m.add(menu.option('T', '拍摄时间',   set_datetime,      get_datetime))
     m.add(menu.splitter('- 排版设置 -'))
-    m.add(menu.option('P', '排版样式',   lambda: p_main(typeset),                   lambda: p_value(typeset)))
-    m.add(menu.option('C', '排版参数…',  lambda: bottom_side_main(bottom_side),     enfunc=lambda: typeset.data == '底部双侧标注'))
-    m.add(menu.option('C', '排版参数…',  lambda: bottom_center_main(bottom_center), enfunc=lambda: typeset.data == '底部中央标注'))
-    m.add(menu.option('C', '排版参数…',  lambda: blur_main(back_blur),              enfunc=lambda: typeset.data == '背景模糊标注'))
-    m.add(menu.option('S', '图像尺寸',   lambda: s_main(size),                      lambda: s_value(size)))
-    m.add(menu.option('N', '图像阴影',   lambda: n_main(enshadow),                  lambda: n_value(enshadow)))
-    m.add(menu.option('H', '阴影效果…',  shadow.style_main,                         enfunc=h_enable))
-    m.add(menu.option('W', '图像水印',   lambda: w_main(enwatermark),               lambda: w_value(enwatermark)))
-    m.add(menu.option('A', '水印样式…',  watermark.style.main,                      enfunc=lambda: enwatermark.data))
+    m.add(menu.option('P', '排版样式',   p_main, p_value))
+    m.add(menu.option('C', '排版参数…',  bottom_side_main,   enfunc=lambda: CONFIG.typeset == '底部双侧标注'))
+    m.add(menu.option('C', '排版参数…',  bottom_center_main, enfunc=lambda: CONFIG.typeset == '底部中央标注'))
+    m.add(menu.option('C', '排版参数…',  blur_main,          enfunc=lambda: CONFIG.typeset == '背景模糊标注'))
+    m.add(menu.option('S', '图像尺寸',   s_main,             s_value))
+    m.add(menu.option('N', '图像阴影',   n_main,             n_value))
+    m.add(menu.option('H', '阴影效果…',  shadow.style_main,  enfunc=lambda: CONFIG.shadow))
+    m.add(menu.option('W', '图像水印',   w_main,             w_value))
+    m.add(menu.option('A', '水印样式…',  CONFIG.wstyle.set,  enfunc=lambda: CONFIG.watermark))
+    m.add(menu.option('Y', '保存当前设置', lambda: config.save(CONFIG)))
     m.add(menu.splitter('- 导出 -'))
-    m.add(menu.option('O', '完成设置',   lambda: process(image, m)))
+    m.add(menu.option('O', '完成设置', lambda: process(image, m)))
     m.add(menu.option('X', '跳过'))
     m.run()
 
@@ -154,94 +159,91 @@ def get_datetime() -> str:
 
 #region 图像尺寸
 
-def s_main(size: wrapper):
+def s_main():
     m = menu.menu('Lekco Visurus - 图像尺寸')
-    m.add(menu.option('1', '1080P', lambda: s_1080P(size)))
-    m.add(menu.option('2', '2K',    lambda: s_2K(size)))
-    m.add(menu.option('3', '4K',    lambda: s_4K(size)))
-    m.add(menu.option('4', '自适应', lambda: s_fit(size)))
+    m.add(menu.option('1', '1080P', s_1080P))
+    m.add(menu.option('2', '2K',    s_2K))
+    m.add(menu.option('3', '4K',    s_4K))
+    m.add(menu.option('4', '自适应', s_fit))
     m.add(menu.option('Q', '退出'))
     m.run()
 
-def s_1080P(size: wrapper):
-    size.data = '1080P'
+def s_1080P():
+    CONFIG.size = '1080P'
 
-def s_2K(size: wrapper):
-    size.data = '2K'
+def s_2K():
+    CONFIG.size = '2K'
 
-def s_4K(size: wrapper):
-    size.data = '4K'
+def s_4K():
+    CONFIG.size = '4K'
 
-def s_fit(size: wrapper):
-    size.data = '自适应'
+def s_fit():
+    CONFIG.size = '自适应'
 
-def s_value(size: wrapper) -> str:
-    return size.data
+def s_value() -> str:
+    return CONFIG.size
 
 #endregion
 
 #region 图像阴影
 
-def n_main(enshadow: wrapper):
+def n_main():
     m = menu.menu('Lekco Visurus - 图像阴影')
-    m.add(menu.option('E', '启用', lambda: e_enable(enshadow)))
-    m.add(menu.option('D', '关闭', lambda: e_disable(enshadow)))
+    m.add(menu.option('E', '启用', e_enable))
+    m.add(menu.option('D', '关闭', e_disable))
     m.run()
 
-def e_enable(enshadow: wrapper):
-    enshadow.data = True
+def e_enable():
+    CONFIG.shadow = True
 
-def e_disable(enshadow: wrapper):
-    enshadow.data = False
+def e_disable():
+    CONFIG.shadow = False
 
-def n_value(enshadow: wrapper) -> str:
-    return '启用' if enshadow.data else '关闭'
-
-def h_enable():
-    return enshadow.data
+def n_value() -> str:
+    return '启用' if CONFIG.shadow else '关闭'
 
 #endregion
 
 #region 图像水印
 
-def w_main(enwatermark: wrapper):
+def w_main():
     m = menu.menu('Lekco Visurus - 图像水印')
-    m.add(menu.option('E', '启用', lambda: w_enable(enwatermark)))
-    m.add(menu.option('D', '关闭', lambda: w_disable(enwatermark)))
+    m.add(menu.option('E', '启用', w_enable))
+    m.add(menu.option('D', '关闭', w_disable))
     m.run()
 
-def w_enable(enwatermark: wrapper):
-    enwatermark.data = True
+def w_enable():
+    CONFIG.watermark = True
 
-def w_disable(enwatermark: wrapper):
-    enwatermark.data = False
+def w_disable():
+    CONFIG.watermark = False
 
-def w_value(enwatermark: wrapper) -> str:
-    return '启用' if enwatermark.data else '关闭'
+def w_value() -> str:
+    return '启用' if CONFIG.watermark else '关闭'
 
 #endregion
 
 #region 排版模式
 
-def p_main(typeset: wrapper):
+def p_main():
     m = menu.menu('Lekco Visurus - 排版样式')
-    m.add(menu.option('S', '底部两侧标注', lambda: p_bottom_side(typeset)))
-    m.add(menu.option('C', '底部中央标注', lambda: p_bottom_center(typeset)))
-    m.add(menu.option('B', '背景模糊标注', lambda: p_blur(typeset)))
+    m.add(menu.option('S', '底部两侧标注', p_bottom_side))
+    m.add(menu.option('C', '底部中央标注', p_bottom_center))
+    m.add(menu.option('B', '背景模糊标注', p_blur))
     m.add(menu.option('Q', '返回'))
     m.run()
 
-def p_bottom_side(typeset: wrapper):
-    typeset.data = '底部双侧标注'
+def p_bottom_side():
+    CONFIG.typeset = '底部双侧标注'
 
-def p_bottom_center(typeset: wrapper):
-    typeset.data = '底部中央标注'
+def p_bottom_center():
+    CONFIG.typeset = '底部中央标注'
 
-def p_blur(typeset: wrapper):
-    typeset.data = '背景模糊标注'
+def p_blur():
+    CONFIG.typeset = '背景模糊标注'
 
-def p_value(typeset: wrapper) -> str:
-    return typeset.data
+def p_value() -> str:
+    return CONFIG.typeset
 
 #endregion
 
@@ -261,53 +263,60 @@ def param_display():
     print_spliter()
 
 @errhandler
-def param_set(param: wrapper, id: int):
+def set_param(attrname: str, id: int):
     print_output('请输入参数对应的占位符:')
     print_ps('请按顺序连续拼接一个或多个参数.')
-    param.data[id] = get_input()
+    getattr(CONFIG, attrname)[id] = get_input()
 
-def bottom_side_main(param: wrapper):
+@errhandler
+def get_param(attrname: str, id: int):
+    return getattr(CONFIG, attrname)[id]
+
+def bottom_side_main():
+    ATTRNAME = 'bottom_side'
     m = menu.menu('Lekco Visurus - 排版参数', 'Q')
     m.add(menu.display(param_display))
-    m.add(menu.option('A', '左第一行', lambda: param_set(param, 0), lambda: param.data[0]))
-    m.add(menu.option('B', '左第二行', lambda: param_set(param, 1), lambda: param.data[1]))
-    m.add(menu.option('C', '右第一行', lambda: param_set(param, 2), lambda: param.data[2]))
-    m.add(menu.option('D', '右第二行', lambda: param_set(param, 3), lambda: param.data[3]))
+    m.add(menu.option('A', '左第一行', lambda: set_param(ATTRNAME, 0), lambda: get_param(ATTRNAME, 0)))
+    m.add(menu.option('B', '左第二行', lambda: set_param(ATTRNAME, 1), lambda: get_param(ATTRNAME, 1)))
+    m.add(menu.option('C', '右第一行', lambda: set_param(ATTRNAME, 2), lambda: get_param(ATTRNAME, 2)))
+    m.add(menu.option('D', '右第二行', lambda: set_param(ATTRNAME, 3), lambda: get_param(ATTRNAME, 3)))
     m.add(menu.option('Q', '返回'))
     m.run()
 
-def bottom_center_main(param: wrapper):
+def bottom_center_main():
+    ATTRNAME = 'bottom_center'
     m = menu.menu('Lekco Visurus - 排版参数', 'Q')
     m.add(menu.display(param_display))
-    m.add(menu.option('A', '第一行黑字', lambda: param_set(param, 0), lambda: param.data[0]))
-    m.add(menu.option('B', '第一行红字', lambda: param_set(param, 1), lambda: param.data[1]))
-    m.add(menu.option('C', '第一行粗字', lambda: param_set(param, 2), lambda: param.data[2]))
-    m.add(menu.option('D', '第二行',     lambda: param_set(param, 3), lambda: param.data[3]))
+    m.add(menu.option('A', '第一行黑字', lambda: set_param(ATTRNAME, 0), lambda: get_param(ATTRNAME, 0)))
+    m.add(menu.option('B', '第一行红字', lambda: set_param(ATTRNAME, 1), lambda: get_param(ATTRNAME, 1)))
+    m.add(menu.option('C', '第一行粗字', lambda: set_param(ATTRNAME, 2), lambda: get_param(ATTRNAME, 2)))
+    m.add(menu.option('D', '第二行',     lambda: set_param(ATTRNAME, 3), lambda: get_param(ATTRNAME, 3)))
     m.add(menu.option('Q', '返回'))
     m.run()
 
-def blur_main(param: wrapper):
+def blur_main():
+    ATTRNAME = 'back_blur'
     m = menu.menu('Lekco Visurus - 排版参数', 'Q')
     m.add(menu.display(param_display))
-    m.add(menu.option('A', '第一行文本',   lambda: param_set(param, 0),        lambda: param.data[0]))
-    m.add(menu.option('B', '第二行文本',   lambda: param_set(param, 1),        lambda: param.data[1]))
-    m.add(menu.option('R', '背景模糊程度', lambda: blur_set_blur(param),       lambda: param.data[2].__str__()))
-    m.add(menu.option('I', '背景亮度',     lambda: blur_set_brightness(param), lambda: f'{param.data[3] * 100}%'))
+    m.add(menu.option('A', '第一行文本',   lambda: set_param(ATTRNAME, 0), lambda: get_param(ATTRNAME, 0)))
+    m.add(menu.option('B', '第二行文本',   lambda: set_param(ATTRNAME, 1), lambda: get_param(ATTRNAME, 1)))
+    m.add(menu.option('R', '背景模糊程度', lambda: blur_set_blur,          lambda: CONFIG.back_blur[2].__str__()))
+    m.add(menu.option('I', '背景亮度',     lambda: blur_set_brightness,    lambda: f'{CONFIG.back_blur[3] * 100}%'))
     m.add(menu.option('Q', '返回'))
     m.run()
 
 @errhandler
-def blur_set_blur(param: wrapper):
+def blur_set_blur():
     print_output('请输入模糊半径:')
-    param.data[2] = int(get_input())
+    CONFIG.back_blur[2] = int(get_input())
 
 @errhandler
-def blur_set_brightness(param: wrapper):
+def blur_set_brightness():
     print_output('请输入亮度(%):')
     ans = int(get_input())
     if ans < 0 or ans > 100:
         raise ValueError(f'非法的亮度值 \'{ans}\'')
-    param.data[3] = ans / 100
+    CONFIG.back_blur[3] = ans / 100
 
 #endregion
 
@@ -324,29 +333,29 @@ params_map = {
     'T' : Base.DateTimeOriginal
 }
 
-def param_to_str(params: wrapper, id: int) -> str:
-    return params.data[id].format_map({key : info[params_map[key]] for key in params_map.keys()})
+def param_to_str(attrname: str, id: int) -> str:
+    return getattr(CONFIG, attrname)[id].format_map({key : info[params_map[key]] for key in params_map.keys()})
 
 def process(image: image, menu: menu.menu):
     img = resize(image.image)
-    if enshadow.data:
+    if CONFIG.watermark:
         img = shadow.process(img)
-    if   typeset.data == '底部双侧标注':
+    if   CONFIG.typeset == '底部双侧标注':
         img = process_bottom_side(img)
-    elif typeset.data == '底部中央标注':
+    elif CONFIG.typeset == '底部中央标注':
         img = process_bottom_center(img)
-    elif typeset.data == '背景模糊标注':
+    elif CONFIG.typeset == '背景模糊标注':
         img = process_blur(img)
-    if enwatermark.data:
+    if CONFIG.watermark:
         img = watermark.main.process(img)
     out.append(output.outimage(img, image))
     menu.exit()
 
 def resize(image: Image.Image) -> Image.Image:
-    if size.data == '自适应':
+    if CONFIG.size == '自适应':
         return image
-    newheight = round(image.height * width[size.data] / image.width)
-    return image.resize((width[size.data], newheight))
+    newheight = round(image.height * width[CONFIG.size] / image.width)
+    return image.resize((width[CONFIG.size], newheight))
 
 def process_bottom_side(image: Image.Image) -> Image.Image:
     width, height = image.size
@@ -363,7 +372,7 @@ def process_bottom_side(image: Image.Image) -> Image.Image:
     light = ImageFont.truetype(resources.get_font(resources.font.PUHUI_LIGHT), font)
     bold  = ImageFont.truetype(resources.get_font(resources.font.PUHUI_BOLD), font)
     draw  = ImageDraw.Draw(final)
-    sget  = lambda id: param_to_str(bottom_side, id)
+    sget  = lambda id: param_to_str('bottom_side', id)
     
     draw.text((margin, offy), sget(0), (0, 0, 0), bold)
     draw.text((margin, offy + font + bmar2), sget(1), (50, 50, 50), light)
@@ -386,7 +395,7 @@ def process_bottom_center(image: Image.Image) -> Image.Image:
     
     final  = Image.new('RGBA', (width + margin * 2, height + margin + bottom), (255, 255, 255))
     final.paste(image, (margin, margin), image)
-    sget  = lambda id: param_to_str(bottom_center, id)
+    sget  = lambda id: param_to_str('bottom_center', id)
     
     light   = ImageFont.truetype(resources.get_font(resources.font.PUHUI_LIGHT), font2)
     regular = ImageFont.truetype(resources.get_font(resources.font.PUHUI_REGULAR), font1)
@@ -421,10 +430,10 @@ def process_blur(image: Image.Image) -> Image.Image:
     bheight = round(height + margin + bottom)
     final   = ImageEnhance.Brightness(image.copy() \
                                            .resize((bwidth, bheight)) \
-                                           .filter(ImageFilter.GaussianBlur(back_blur.data[2]))) \
-                                           .enhance(back_blur.data[3])
+                                           .filter(ImageFilter.GaussianBlur(CONFIG.back_blur[2]))) \
+                                           .enhance(CONFIG.back_blur[3])
     final.paste(image, (margin, margin), image)
-    sget = lambda id: param_to_str(back_blur, id)
+    sget = lambda id: param_to_str('back_blur', id)
     
     bold    = ImageFont.truetype(resources.get_font(resources.font.PUHUI_BOLD), font1)
     regular = ImageFont.truetype(resources.get_font(resources.font.PUHUI_REGULAR), font2)

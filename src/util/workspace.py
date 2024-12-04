@@ -32,7 +32,7 @@ def check_space() -> bool:
     return ret
 
 @errhandler
-def choose() -> list:
+def choose() -> list[int]:
     if not check_space():
         return
     
@@ -162,7 +162,7 @@ def c_display():
         print_left(f'{i + 1}. ' + chosen[i].formated_name())
     print_spliter()
 
-def c_main() -> list:
+def c_main() -> list[image]:
     c_init()
     
     m = menu.menu('Lekco Visurus - 工作区', 'Q')

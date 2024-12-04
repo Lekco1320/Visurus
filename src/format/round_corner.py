@@ -1,4 +1,5 @@
 from util import *
+from util import config
 from util import menu
 from util import output
 from util import workspace
@@ -6,10 +7,11 @@ from util import workspace
 from PIL import Image
 from PIL import ImageDraw
 
-from config import Config
-
 targets: list[image] = []
-radius               = wrapper(Config['round_corner.radius'])
+
+CONFIG = config.get('round_corner', {
+    'radius' : 10
+})
 
 def main():
     targets.clear()
@@ -17,16 +19,17 @@ def main():
     m = menu.menu('Lekco Visurus - 圆角效果', 'Q')
     m.add(menu.display(display))
     m.add(menu.option('C', '选择目标图像…', choose_targets))
-    m.add(menu.option('R', '圆角半径',      lambda: set_radius(radius), lambda: get_radius(radius)))
+    m.add(menu.option('R', '圆角半径',      set_radius, get_radius))
+    m.add(menu.option('Y', '保存当前设置',  lambda: config.save(CONFIG)))
     m.add(menu.option('O', '执行导出…',     execute))
     m.add(menu.option('Q', '返回'))
     m.run()
 
 def radius_main():
-    set_radius(radius)
+    set_radius()
 
 def radius_value() -> str:
-    return get_radius(radius)
+    return get_radius()
 
 def display():
     print_left(f'已选择 {len(targets)} 张目标图像:')
@@ -40,15 +43,15 @@ def choose_targets():
     targets = workspace.c_main()
 
 @errhandler
-def set_radius(radius: wrapper):
+def set_radius():
     print_output('请输入圆角半径:')
     value = int(get_input())
     if value < 0:
         raise ValueError(f'非法的圆角半径值 {value}')
-    radius.data = value
+    CONFIG.radius = value
 
-def get_radius(radius: wrapper) -> str:
-    return f'{radius.data}px'
+def get_radius() -> str:
+    return f'{CONFIG.radius}px'
 
 @errhandler
 def execute():
@@ -66,7 +69,7 @@ def execute():
 
 # https://www.pyget.cn/p/185266
 def process(image: Image.Image) -> Image.Image: 
-    radii = radius.data
+    radii = CONFIG.radius
     circle = Image.new('L', (radii * 2, radii * 2), 0)
     draw = ImageDraw.Draw(circle)
     draw.ellipse((0, 0, radii * 2, radii * 2), fill=255)

@@ -1,20 +1,22 @@
 import os
 
 from util import *
+from util import config
 from util import ansi
 from util import menu
 from util import workspace
 
 from tkinter  import filedialog
 from datetime import datetime
-from config   import Config
 
 images: list[outimage] = []
 chosen: list[int]      = []
 
-ddir    = wrapper(Config['output.ddir'])
-fformat = wrapper(Config['output.fformat'])
-nformat = wrapper(Config['output.nformat'])
+CONFIG = config.get('output', {
+    'dir'      : '桌面',
+    'format'   : '*.JPG',
+    'filename' : R'o_{N}{E}'
+})
 
 def init(imgs: list[outimage]):
     global images, chosen
@@ -25,14 +27,17 @@ def main(imgs: list[outimage]):
     init(imgs)
     
     m = menu.menu('Lekco Visurus - 导出设置', 'Q')
+    m.add(menu.display(display))
+    m.add(menu.splitter('参数'))
+    m.add(menu.option('P', '导出内容',   p_main, p_value))
+    m.add(menu.option('D', '导出路径',   d_main, d_value))
+    m.add(menu.option('F', '导出格式',   f_main, f_value))
+    m.add(menu.option('S', '文件名格式', n_main, n_value))
+    m.add(menu.splitter('导出'))
     m.add(menu.option('V', '预览图像',   preview))
-    m.add(menu.option('P', '导出内容',   p_main,                  p_value))
-    m.add(menu.option('D', '导出路径',   lambda: d_main(ddir),    lambda: d_value(ddir)))
-    m.add(menu.option('F', '导出格式',   lambda: f_main(fformat), lambda: f_value(fformat)))
-    m.add(menu.option('S', '文件名格式', lambda: n_main(nformat), lambda: n_value(nformat)))
+    m.add(menu.option('Y', '保存当前设置', lambda: config.save(CONFIG)))
     m.add(menu.option('O', '确认并导出', output))
     m.add(menu.option('Q', '返回'))
-    m.add(menu.display(display))
     m.run()
 
 def display():
@@ -81,50 +86,50 @@ def p_main():
 def p_value() -> str:
     return chosen.__str__()
 
-def d_main(ddir: wrapper):
+def d_main():
     m = menu.menu('Lekco Visurus - 导出内容')
-    m.add(menu.option('O', '导出至源路径', lambda: d_source(ddir)))
-    m.add(menu.option('D', '导出至桌面',   lambda: d_desktop(ddir)))
-    m.add(menu.option('F', '选择指定目录', lambda: d_disk(ddir)))
+    m.add(menu.option('O', '导出至源路径', d_source))
+    m.add(menu.option('D', '导出至桌面',   d_desktop))
+    m.add(menu.option('F', '选择指定目录', d_disk))
     m.add(menu.option('Q', '返回'))
     m.run()
 
-def d_source(ddir: wrapper): 
-    ddir.data = '源路径'
+def d_source(): 
+    CONFIG.dir = '源路径'
 
-def d_desktop(ddir: wrapper): 
-    ddir.data = '桌面'
+def d_desktop(): 
+    CONFIG.dir = '桌面'
 
-def d_disk(ddir: wrapper):
+def d_disk():
     print_output('请选择目标路径:')
-    ddir.data = filedialog.askdirectory()
+    CONFIG.dir = filedialog.askdirectory()
 
-def d_value(ddir: wrapper) -> str:
-    return compress_path(ddir.data, SPLITER_LENGTH - text_width('* D | 导出路径:  *'))
+def d_value() -> str:
+    return compress_path(CONFIG.dir, SPLITER_LENGTH - text_width('* D | 导出路径:  *'))
 
-def f_main(fformat: wrapper):
+def f_main():
     m = menu.menu('Lekco Visurus - 导出格式')
-    m.add(menu.option('J', '*.JPG', lambda: f_jpg(fformat)))
-    m.add(menu.option('P', '*.PNG', lambda: f_png(fformat)))
-    m.add(menu.option('B', '*.BMP', lambda: f_bmp(fformat)))
-    m.add(menu.option('G', '*.GIF', lambda: f_gif(fformat)))
+    m.add(menu.option('J', '*.JPG', f_jpg))
+    m.add(menu.option('P', '*.PNG', f_png))
+    m.add(menu.option('B', '*.BMP', f_bmp))
+    m.add(menu.option('G', '*.GIF', f_gif))
     m.add(menu.option('Q', '返回'))
     m.run()
 
-def f_jpg(fformat: wrapper):
-    fformat.data = '*.JPG'
+def f_jpg():
+    CONFIG.format = '*.JPG'
 
-def f_png(fformat: wrapper):
-    fformat.data = '*.PNG'
+def f_png():
+    CONFIG.format = '*.PNG'
 
-def f_bmp(fformat: wrapper):
-    fformat.data = '*.BMP'
+def f_bmp():
+    CONFIG.format = '*.BMP'
 
-def f_gif(fformat: wrapper):
-    fformat.data = '*.GIF'
+def f_gif():
+    CONFIG.format = '*.GIF'
 
-def f_value(fformat: wrapper) -> str:
-    return fformat.data
+def f_value() -> str:
+    return CONFIG.format
 
 def n_display(): 
     true_clear_screen()
@@ -141,15 +146,15 @@ def n_display():
     print_spliter()
 
 @errhandler
-def n_main(nformat: wrapper): 
+def n_main(): 
     print_title('Lekco Visurus - 文件名格式')
     n_display()
     print_output('请输入参数对应的占位符:')
     print_ps('请按顺序连续拼接一个或多个参数.')
-    nformat.data = get_input()
+    CONFIG.filename = get_input()
 
-def n_value(nformat: wrapper): 
-    return nformat.data
+def n_value(): 
+    return CONFIG.filename
 
 def validate_filename(name: str) -> bool: 
     if os.name == 'posix': 
@@ -160,7 +165,7 @@ def validate_filename(name: str) -> bool:
 
 def generate_filename(path: str) -> str: 
     name      = os.path.splitext(os.path.basename(path))[0]
-    extension = fformat.data[1:].lower()
+    extension = CONFIG.format[1:].lower()
     time      = datetime.now()
     info      = {
         'N': name,
@@ -172,7 +177,7 @@ def generate_filename(path: str) -> str:
         'm': time.minute,
         'S': time.second
     }
-    return nformat.data.format_map({key : info[key] for key in info.keys()})
+    return CONFIG.filename.format_map({key : info[key] for key in info.keys()})
 
 FORMAT_MAP = {
     '*.JPG': 'JPEG',
@@ -183,9 +188,9 @@ FORMAT_MAP = {
 
 def output():
     print_output('正在导出图像...')
-    format = FORMAT_MAP[fformat.data]
+    format = FORMAT_MAP[CONFIG.format]
     for i in chosen:
-        dir = ddir.data
+        dir = CONFIG.dir
         if dir == '桌面':
             if os.name == 'posix':
                 dir = os.path.join(os.path.expanduser('~'), 'Desktop')

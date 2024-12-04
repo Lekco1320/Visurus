@@ -8,6 +8,16 @@ from util import appdir
 
 RESOURCE_FOLDER: Path = None
 
+_FONT_ANNOTATIONS = {
+    'PUHUI_LIGHT'   : '阿里巴巴普惠体-Light',
+    'PUHUI_REGULAR' : '阿里巴巴普惠体-Regular',
+    'PUHUI_BOLD'    : '阿里巴巴普惠体-Bold',
+    'SONGTI_BOLD'   : '思源宋体-Bold',
+    'TIMES_REGULAR' : 'Times New Roman',
+    'TIMES_ITALIC'  : 'Times New Roman-Italic',
+    'TIMES_BITALIC' : 'Times New Roman-Bold Italic',
+}
+
 class font(Enum):
     PUHUI_LIGHT   = 'font/AlibabaPuHuiTi-3-45-Light.otf'
     PUHUI_REGULAR = 'font/AlibabaPuHuiTi-3-55-Regular.otf'
@@ -17,6 +27,9 @@ class font(Enum):
     TIMES_BOLD    = 'font/timesbd.ttf'
     TIMES_ITALIC  = 'font/timesi.ttf'
     TIMES_BITALIC = 'font/timesbi.ttf'
+    
+    def __str__(self) -> str:
+        return _FONT_ANNOTATIONS[self.name]
 
 class icon(Enum):
     LOCATION = 'icon/location.png'
