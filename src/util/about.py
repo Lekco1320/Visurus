@@ -22,7 +22,7 @@ def display():
     print_left(italic('Visurus') + ' is the future participle form of')
     print_left('the Latin verb ' + italic('videō') + ' (to see).')
     print_spliter()
-    print_kv('版本', '1.0.1.186')
+    print_kv('版本', '1.0.1.560')
     print_kv('作者', 'Lukas Zhang')
     print_kv('邮箱', 'Lekco_1320@qq.com')
     print_kv('仓库', 'https://github.com/Lekco1320/Visurus')

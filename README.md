@@ -1,9 +1,9 @@
 # Visurus
 
-> [![hugo-papermod](https://img.shields.io/badge/Visurus-@Lekco-red)](https://github.com/Lekco1320/Visurus)
-> [![release](https://img.shields.io/github/v/release/Lekco1320/Visurus)](https://github.com/Lekco1320/Visurus/releases)
-> [![Apache License](https://img.shields.io/npm/l/echarts?color=green)](LICENSE)
->
+[![hugo-papermod](https://img.shields.io/badge/Visurus-@Lekco-red)](https://github.com/Lekco1320/Visurus)
+[![release](https://img.shields.io/github/v/release/Lekco1320/Visurus)](https://github.com/Lekco1320/Visurus/releases)
+[![Apache License](https://img.shields.io/npm/l/echarts?color=green)](LICENSE)
+
 > ***Visurus*** is the future participle form of the Latin verb ***videō*** (to see).
 
 *Visurus* 是一个批量图像格式化、图像拼接和添加水印的开源工具。

@@ -1,6 +1,17 @@
-from util import *
+from util   import *
+from typing import overload
 
 class color:
+    @overload
+    def __init__(self, value: tuple) -> None:
+        """value: (R, G, B, A)"""
+        ...
+    
+    @overload
+    def __init__(self, value: str) -> None:
+        """value: '#RRGGBBAA'"""
+        ...
+    
     def __init__(self, value: tuple | str) -> None:
         self._r, self._g, self._b, self._a = color.check(value)
     
@@ -30,7 +41,7 @@ class color:
     
     @property
     def hex(self) -> str:
-        return f'#{self._r:02x}{self._g:02x}{self._b:02x}{self._a:02x}'
+        return f'#{self._r:02x}{self._g:02x}{self._b:02x}{self._a:02x}'.upper()
     
     @property
     def channels(self) -> str:
@@ -43,7 +54,7 @@ class color:
     def __str__(self) -> str:
         return self.hex
     
-    @staticmethod
+    @classmethod
     @errhandler
     def input() -> 'color':
         print_output('请任选一种格式输入颜色值:')

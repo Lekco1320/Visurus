@@ -2,6 +2,7 @@ import watermark
 import resources
 
 from util import *
+from util import config
 from util import menu
 from util import lstr
 from util import output
@@ -15,16 +16,19 @@ from PIL import ImageFont
 from PIL import ImageDraw
 
 from datetime import datetime
-from config import Config
 
 #region 变量
 
+CONFIG = config.get('species_label', {
+    'size'      : '2K',
+    'shadow'    : False,
+    'radius'    : False,
+    'watermark' : False,
+    'wstyle'    : watermark.style.default()
+})
+
 targets       = []
 species_name  = lstr.lstr()
-size          = wrapper(Config['species_label.size'])
-enshadow      = wrapper(Config['species_label.enshadow'])
-encorner      = wrapper(Config['species_label.encorner'])
-enwatermark   = wrapper(Config['species_label.enwatermark'])
 latin_name    = ''
 gender        = '未知'
 location      = ''
@@ -55,14 +59,15 @@ def main():
     m.add(menu.option('G', '性别',         g_main,           g_value))
     m.add(menu.option('D', '日期',         set_date,         get_date))
     m.add(menu.option('T', '地点',         set_location,     get_location))
-    m.add(menu.splitter('- 图像样式 -'))
-    m.add(menu.option('S', '图像尺寸',     lambda: s_main(size),        lambda: s_value(size)))
-    m.add(menu.option('E', '图像阴影',     lambda: e_main(enshadow),    lambda: e_value(enshadow)))
-    m.add(menu.option('H', '阴影效果…',    shadow.style_main,           enfunc=h_enable))
-    m.add(menu.option('A', '图像水印',     lambda: a_main(enwatermark), lambda: a_value(enwatermark)))
-    m.add(menu.option('W', '水印样式…',    watermark.style.main,        enfunc=lambda: enwatermark.data))
-    m.add(menu.option('R', '图像圆角',     lambda: r_main(encorner),    lambda: r_value(encorner)))
-    m.add(menu.option('Y', '圆角半径',     round_corner.radius_main,    round_corner.radius_value, enfunc=y_enable))
+    m.add(menu.splitter('- 样式设置 -'))
+    m.add(menu.option('S', '图像尺寸',     s_main, s_value))
+    m.add(menu.option('E', '图像阴影',     e_main, e_value))
+    m.add(menu.option('H', '阴影效果…',    shadow.style_main, enfunc=lambda: CONFIG.shadow))
+    m.add(menu.option('A', '图像水印',     a_main, a_value))
+    m.add(menu.option('W', '水印样式…',    CONFIG.wstyle.set, enfunc=lambda: CONFIG.watermark))
+    m.add(menu.option('R', '图像圆角',     r_main, r_value))
+    m.add(menu.option('Y', '圆角半径',     round_corner.radius_main, round_corner.radius_value, enfunc=lambda: CONFIG.radius))
+    m.add(menu.option('Y', '保存当前设置', lambda: config.save(CONFIG)))
     m.add(menu.splitter('- 导入与导出 -'))
     m.add(menu.option('C', '选择目标图像…', choose_targets))
     m.add(menu.option('O', '执行导出…',    execute))
@@ -163,92 +168,86 @@ def get_location() -> str:
 
 #region 图像尺寸
 
-def s_main(size: wrapper):
+def s_main():
     m = menu.menu('Lekco Visurus - 图像尺寸')
-    m.add(menu.option('1', '1080P', lambda: s_1080P(size)))
-    m.add(menu.option('2', '2K',    lambda: s_2K(size)))
-    m.add(menu.option('3', '4K',    lambda: s_4K(size)))
-    m.add(menu.option('4', '自适应', lambda: s_fit(size)))
+    m.add(menu.option('1', '1080P', s_1080P))
+    m.add(menu.option('2', '2K',    s_2K))
+    m.add(menu.option('3', '4K',    s_4K))
+    m.add(menu.option('4', '自适应', s_fit))
     m.add(menu.option('Q', '退出'))
     m.run()
 
-def s_1080P(size: wrapper):
-    size.data = '1080P'
+def s_1080P():
+    CONFIG.size = '1080P'
 
-def s_2K(size: wrapper):
-    size.data = '2K'
+def s_2K():
+    CONFIG.size = '2K'
 
-def s_4K(size: wrapper):
-    size.data = '4K'
+def s_4K():
+    CONFIG.size = '4K'
 
-def s_fit(size: wrapper):
-    size.data = '自适应'
+def s_fit():
+    CONFIG.size = '自适应'
 
-def s_value(size: wrapper) -> str:
-    return size.data
+def s_value() -> str:
+    return CONFIG.size
 
 #endregion
 
 #region 图像阴影
 
-def e_main(enshadow: wrapper):
+def e_main():
     m = menu.menu('Lekco Visurus - 图像阴影')
-    m.add(menu.option('E', '启用', lambda: e_enable(enshadow)))
-    m.add(menu.option('D', '关闭', lambda: e_disable(enshadow)))
+    m.add(menu.option('E', '启用', e_enable))
+    m.add(menu.option('D', '关闭', e_disable))
     m.run()
 
-def e_enable(enshadow: wrapper):
-    enshadow.data = True
+def e_enable():
+    CONFIG.shadow = True
 
-def e_disable(enshadow: wrapper):
-    enshadow.data = False
+def e_disable():
+    CONFIG.shadow = False
 
-def e_value(enshadow: wrapper) -> str:
-    return '启用' if enshadow.data else '关闭'
-
-def h_enable():
-    return enshadow.data
+def e_value() -> str:
+    return '启用' if CONFIG.shadow else '关闭'
 
 #endregion
 
 #region 图像圆角
 
-def r_main(encorner: wrapper):
+def r_main():
     m = menu.menu('Lekco Visurus - 图像圆角')
-    m.add(menu.option('E', '启用', lambda: r_enable(encorner)))
-    m.add(menu.option('D', '关闭', lambda: r_disable(encorner)))
+    m.add(menu.option('E', '启用', r_enable))
+    m.add(menu.option('D', '关闭', r_disable))
     m.run()
 
-def r_enable(encorner: wrapper):
-    encorner.data = True
+def r_enable():
+    CONFIG.radius = True
 
-def r_disable(encorner: wrapper):
-    encorner.data = False
+def r_disable():
+    CONFIG.radius = False
 
-def r_value(encorner: wrapper) -> str:
-    return '启用' if encorner.data else '关闭'
-
-def y_enable():
-    return encorner.data
+def r_value() -> str:
+    return '启用' if CONFIG.radius else '关闭'
 
 #endregion
 
 #region 图像水印
 
-def a_main(enwatermark: wrapper):
+def a_main():
     m = menu.menu('Lekco Visurus - 图像水印')
-    m.add(menu.option('E', '启用', lambda: a_enable(enwatermark)))
-    m.add(menu.option('D', '关闭', lambda: a_disable(enwatermark)))
+    m.add(menu.option('E', '启用', a_enable))
+    m.add(menu.option('D', '关闭', a_disable))
     m.run()
 
-def a_enable(enwatermark: wrapper):
-    enwatermark.data = True
+def a_enable():
+    CONFIG.watermark = True
 
-def a_disable(enwatermark: wrapper):
-    enwatermark.data = False
+def a_disable():
+    CONFIG.watermark = False
 
-def a_value(enwatermark: wrapper) -> str:
-    return '启用' if enwatermark.data else '关闭'
+def a_value() -> str:
+    return '启用' if CONFIG.watermark else '关闭'
 
 #endregion
 
@@ -320,15 +319,15 @@ def center_of(target_w: float, border_w: float) -> float:
 
 @errhandler
 def process(img: Image.Image) -> Image.Image:
-    twidth = width[size.data] if size.data != '自适应' else img.width
+    twidth = width[CONFIG.size] if CONFIG.size != '自适应' else img.width
     if img.width != twidth:
         ratio = img.height / img.width
         img   = img.resize((twidth, round(twidth * ratio)))
     
-    if encorner.data:
+    if CONFIG.radius:
         img = round_corner.process(img)
     
-    if enshadow.data:
+    if CONFIG.shadow:
         img = shadow.process(img)
     
     params = get_params(img.size)
@@ -382,7 +381,7 @@ def process(img: Image.Image) -> Image.Image:
         gimg = gimg.resize((params['gender_size'], params['gender_size']))
         final.paste(gimg, (int(x), int(y)), gimg)
     
-    if enwatermark.data:
+    if CONFIG.watermark:
         final = watermark.process(final)
     
     return final

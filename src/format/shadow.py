@@ -1,4 +1,5 @@
 from util import *
+from util import config
 from util import menu
 from util import output
 from util import workspace
@@ -6,13 +7,14 @@ from util import workspace
 from PIL import Image
 from PIL import ImageFilter
 
-from config import Config
-
 targets = []
-shadow  = wrapper(Config['shadow.color'])
-offset  = wrapper(Config['shadow.offset'])
-blur    = wrapper(Config['shadow.blur'])
-limit   = wrapper(Config['shadow.limit'])
+
+CONFIG = config.get('shadow', {
+    'color'  : color('#0000007F'),
+    'offset' : (10, 10),
+    'limit'  : (8, 8),
+    'blur'   : 5,
+})
 
 def main():
     targets.clear()
@@ -20,8 +22,9 @@ def main():
     m = menu.menu('Lekco Visurus - 添加阴影', 'Q')
     m.add(menu.display(display))
     m.add(menu.option('C', '选择目标图像…', choose_targets))
-    m.add(menu.option('S', '阴影效果…', style_main))
-    m.add(menu.option('O', '执行导出…', execute))
+    m.add(menu.option('S', '阴影效果…',     style_main))
+    m.add(menu.option('Y', '保存当前设置',  lambda: config.save(CONFIG)))
+    m.add(menu.option('O', '执行导出…',     execute))
     m.add(menu.option('Q', '返回'))
     m.run()
 
@@ -52,54 +55,54 @@ def execute():
 
 def style_main():
     m = menu.menu('Lekco Visurus - 阴影效果', 'Q')
-    m.add(menu.option('C', '阴影颜色', lambda: set_color(shadow),  lambda: get_color(shadow)))
-    m.add(menu.option('O', '阴影偏移', lambda: set_offset(offset), lambda: get_offset(offset)))
-    m.add(menu.option('L', '范围限制', lambda: set_limit(limit),   lambda: get_limit(limit)))
-    m.add(menu.option('B', '模糊程度', lambda: set_blur(blur),     lambda: get_blur(blur)))
+    m.add(menu.option('C', '阴影颜色', set_color,  get_color))
+    m.add(menu.option('O', '阴影偏移', set_offset, get_offset))
+    m.add(menu.option('L', '范围限制', set_limit,  get_limit))
+    m.add(menu.option('B', '模糊程度', set_blur,   get_blur))
     m.add(menu.option('Q', '返回'))
     m.run()
 
-def set_color(shadow: wrapper):
-    shadow.data = color.input().hex
+def set_color():
+    CONFIG.color = color.input()
 
-def get_color(shadow: wrapper) -> str:
-    return shadow.data.__str__()
+def get_color() -> str:
+    return CONFIG.color.__str__()
 
 @errhandler
-def set_offset(offset: wrapper):
+def set_offset():
     print_output('请输入偏移量 x,y :')
     ans = list(map(int, get_input().split(',')))
     if len(ans) != 2:
         raise ValueError(f'错误的坐标分量数 \'{len(ans)}\'.')
-    offset.data = (ans[0], ans[1])
+    CONFIG.offset = (ans[0], ans[1])
 
-def get_offset(offset: wrapper) -> str:
-    return offset.data.__str__()
+def get_offset() -> str:
+    return CONFIG.offset.__str__()
 
 @errhandler
-def set_limit(limit: wrapper):
+def set_limit():
     print_output('请输入范围限制 x,y:')
     ans = list(map(int, get_input().split(',')))
     if len(ans) != 2:
         raise ValueError(f'错误的坐标分量数 \'{len(ans)}\'.')
-    limit.data = (ans[0], ans[1])
+    CONFIG.limit = (ans[0], ans[1])
 
-def get_limit(limit: wrapper) -> str:
-    return limit.data.__str__()
+def get_limit() -> str:
+    return CONFIG.limit.__str__()
 
 @errhandler
-def set_blur(blur: wrapper):
+def set_blur():
     print_output('请输入模糊程度(>=0):')
     ans = int(get_input())
     if ans < 0:
         raise ValueError(f'模糊程度 \'{ans}\' 无效.')
-    blur.data = ans
+    CONFIG.blur = ans
 
-def get_blur(blur: wrapper) -> str:
-    return blur.data.__str__()
+def get_blur() -> str:
+    return CONFIG.blur.__str__()
 
 def process(image: Image.Image) -> Image.Image:
-    return _blur(image, (offset.data[0], offset.data[1]), (limit.data[0], limit.data[1]), color(shadow.data), blur.data)
+    return _blur(image, CONFIG.offset, CONFIG.limit, CONFIG.color, CONFIG.blur)
 
 # https://code.activestate.com/recipes/474116-drop-shadows-with-pil/
 def _blur(image: Image.Image, offset: tuple, limit: tuple, color: color, depth: int) -> Image.Image:
