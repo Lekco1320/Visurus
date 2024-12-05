@@ -1,75 +1,54 @@
 from util import *
 from util import config
 from util import menu
-from util import output
-from util import workspace
 
 from PIL import Image
 from PIL import ImageDraw
 
-targets: list[image] = []
-
-CONFIG = config.get('round_corner', {
-    'radius' : 10
-})
-
-def main():
-    targets.clear()
+class style(config.config):
+    FIELDS = [
+        config.field('radius', 10),
+    ]
     
+    DEFAULT = None
+
+    @classmethod
+    def default(cls) -> 'style':
+        ret = style()
+        ret.validate(style.FIELDS)
+        return ret
+    
+    def __init__(self) -> None:
+        super().__init__('')
+        self.validate(style.FIELDS)
+    
+    def self_validate(self) -> bool:
+        return super().validate(style.FIELDS)
+    
+    def set(self):
+        style_main(self)
+
+style.DEFAULT = style.default()
+
+def style_main(style: style):
     m = menu.menu('Lekco Visurus - 圆角效果', 'Q')
-    m.add(menu.display(display))
-    m.add(menu.option('C', '选择目标图像…', choose_targets))
-    m.add(menu.option('R', '圆角半径',      set_radius, get_radius))
-    m.add(menu.option('Y', '保存当前设置',  lambda: config.save(CONFIG)))
-    m.add(menu.option('O', '执行导出…',     execute))
+    m.add(menu.option('R', '圆角半径', lambda: set_radius(style), lambda: get_radius(style)))
     m.add(menu.option('Q', '返回'))
-    m.run()
-
-def radius_main():
-    set_radius()
-
-def radius_value() -> str:
-    return get_radius()
-
-def display():
-    print_left(f'已选择 {len(targets)} 张目标图像:')
-    for i in range(len(targets)):
-        print_left(f'{i + 1}. ' + targets[i].formated_name())
-    print_spliter()
-
-# 选择图片对象
-def choose_targets():
-    global targets
-    targets = workspace.c_main()
 
 @errhandler
-def set_radius():
+def set_radius(style: style):
     print_output('请输入圆角半径:')
     value = int(get_input())
     if value < 0:
         raise ValueError(f'非法的圆角半径值 {value}')
-    CONFIG.radius = value
+    style.radius = value
 
-def get_radius() -> str:
-    return f'{CONFIG.radius}px'
-
-@errhandler
-def execute():
-    if len(targets) <= 0:
-        raise ValueError('目标图像为空.')
-    
-    out = []
-    for srcimg in targets:
-        print_output(f'正在处理 {srcimg.name}...')
-        processed = process(srcimg.image)
-        out.append(output.outimage(processed, srcimg))
-    
-    if len(out) > 0:
-        output.main(out)
+def get_radius(style: style) -> str:
+    return f'{style.radius}px'
 
 # https://www.pyget.cn/p/185266
-def process(image: Image.Image) -> Image.Image: 
-    radii = CONFIG.radius
+def process(style: style, image: Image.Image) -> Image.Image: 
+    radii = style.radius
     circle = Image.new('L', (radii * 2, radii * 2), 0)
     draw = ImageDraw.Draw(circle)
     draw.ellipse((0, 0, radii * 2, radii * 2), fill=255)

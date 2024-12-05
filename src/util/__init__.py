@@ -4,7 +4,8 @@ from .printer    import *
 from .image      import image
 from .image      import outimage
 from .color      import color
-from .history    import history
+from .history    import history, nohistory
+from .version    import version
 
 __all__ = [
     "errhandler",
@@ -35,4 +36,6 @@ __all__ = [
     "compress_path",
     "SPLITER_LENGTH",
     "history",
+    "nohistory",
+    "version",
 ]

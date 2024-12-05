@@ -22,16 +22,17 @@ from format import shadow
 targets: list[image] = []
 out: list[outimage]  = []
 
-CONFIG = config.get('photo_params', {
-    'size'          : '2K',
-    'shadow'        : False,
-    'watermark'     : False,
-    'wstyle'        : watermark.style.default(),
-    'typeset'       : '底部双侧标注',
-    'bottom_side'   : ['{B}', '{D}', '{L} {F} {E} {I}', '{T}'],
-    'bottom_center' : ['Shot on ', '{D} ', '{M} ', '{L} {F} {E} {I}'],
-    'back_blur'     : ['{D}', '{L} {F} {E} {I}', 50, 0.45],
-})
+CONFIG = config.get('photo_params', [
+    config.field('size',          '2K'),
+    config.field('shadow',        False),
+    config.field('sstyle',        shadow.style.DEFAULT,    shadow.style.self_validate),
+    config.field('watermark',     False),
+    config.field('wstyle',        watermark.style.DEFAULT, watermark.style.self_validate),
+    config.field('typeset',       '底部双侧标注'),
+    config.field('bottom_side',   ['{B}', '{D}', '{L} {F} {E} {I}', '{T}']),
+    config.field('bottom_center', ['Shot on ', '{D} ', '{M} ', '{L} {F} {E} {I}']),
+    config.field('back_blur',     ['{D}', '{L} {F} {E} {I}', 50, 0.45]),
+])
 
 width = { '1080P' : 1920, '2K' : 2560, '4K' : 3840 }
 info  = None
@@ -75,7 +76,7 @@ def single_main(image: image):
     m.add(menu.option('C', '排版参数…',  blur_main,          enfunc=lambda: CONFIG.typeset == '背景模糊标注'))
     m.add(menu.option('S', '图像尺寸',   s_main,             s_value))
     m.add(menu.option('N', '图像阴影',   n_main,             n_value))
-    m.add(menu.option('H', '阴影效果…',  shadow.style_main,  enfunc=lambda: CONFIG.shadow))
+    m.add(menu.option('H', '阴影效果…',  CONFIG.sstyle.set,  enfunc=lambda: CONFIG.shadow))
     m.add(menu.option('W', '图像水印',   w_main,             w_value))
     m.add(menu.option('A', '水印样式…',  CONFIG.wstyle.set,  enfunc=lambda: CONFIG.watermark))
     m.add(menu.option('Y', '保存当前设置', lambda: config.save(CONFIG)))
@@ -339,7 +340,7 @@ def param_to_str(attrname: str, id: int) -> str:
 def process(image: image, menu: menu.menu):
     img = resize(image.image)
     if CONFIG.watermark:
-        img = shadow.process(img)
+        img = shadow.process(CONFIG.sstyle, img)
     if   CONFIG.typeset == '底部双侧标注':
         img = process_bottom_side(img)
     elif CONFIG.typeset == '底部中央标注':
@@ -347,7 +348,7 @@ def process(image: image, menu: menu.menu):
     elif CONFIG.typeset == '背景模糊标注':
         img = process_blur(img)
     if CONFIG.watermark:
-        img = watermark.main.process(img)
+        img = watermark.main.process(CONFIG.wstyle, img)
     out.append(output.outimage(img, image))
     menu.exit()
 

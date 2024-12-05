@@ -2,28 +2,44 @@ import os
 import resources
 
 from util import *
+from util import config
 from util import menu
 
 #region 变量
 
-class style:
-    @classmethod
-    def default(cls) -> 'style':
-        ret          = style()
-        ret.content  = '文字'
-        ret.font     = resources.font.TIMES_REGULAR
-        ret.color    = color('#0000007F')
-        ret.text     = 'Lekco'
-        ret.psource  = '无'
-        ret.opacity  = 100
-        ret.aligns   = ['居中对齐', '底部对齐']
-        ret.scale    = ['固定尺寸', ('*', '*')]
-        ret.position = '图像下中央'
-        ret.offset   = (0, 0)
+class style(config.config):
+    FIELDS = [
+        config.field('content',  '文字'),
+        config.field('font',     resources.font.TIMES_REGULAR),
+        config.field('color',    color('#0000007F')),
+        config.field('text',     'Lekco'),
+        config.field('psource',  '无'),
+        config.field('opacity',  100),
+        config.field('aligns',   ['居中对齐', '底部对齐']),
+        config.field('scale',    ['固定尺寸', ('*', '*')]),
+        config.field('position', '图像下中央'),
+        config.field('offset',   (0, 0))
+    ]
+    
+    DEFAULT = None
+    
+    @staticmethod
+    def default() -> 'style':
+        ret = style()
+        ret.validate(style.FIELDS)
         return ret
+    
+    def __init__(self) -> None:
+        super().__init__('')
+        self.validate(style.FIELDS)
+    
+    def self_validate(self) -> bool:
+        return super().validate(style.FIELDS)
     
     def set(self):
         main(self)
+
+style.DEFAULT = style.default()
 
 #endregion
 

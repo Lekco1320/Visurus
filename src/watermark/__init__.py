@@ -1,8 +1,8 @@
-from .main import main, process
+from .main   import main_menu, process
 from .scaler import *
 from .anchor import *
-from .mark import *
-from .style import style
+from .mark   import *
+from .style  import style
 
 __all__ = [
     "scaler",
@@ -15,6 +15,6 @@ __all__ = [
     "image_mark",
     "label_mark",
     "process",
-    "main",
+    "main_menu",
     "style"
 ]

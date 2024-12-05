@@ -1,4 +1,5 @@
 import random
+import resources
 
 from .scaler import *
 from .anchor import *
@@ -14,13 +15,13 @@ from util import workspace
 from PIL import Image
 
 targets = []
-CONFIG  = config.get('watermark', {
-    'style' : style.default()
-})
+CONFIG  = config.get('watermark', [
+    config.field('style', style.DEFAULT, style.self_validate)
+])
 
 #region 主函数
 
-def main():
+def main_menu():
     m = menu.menu('Lekco Visurus - 添加水印', 'Q')
     m.add(menu.display(display))
     m.add(menu.option('C', '选择目标图像…', choose_targets))
@@ -95,7 +96,7 @@ def get_anchor(style: style, position: tuple[int, int]) -> anchor:
 def get_mark(style: style, anchor: anchor, scaler: scaler) -> markbase:
     mark = None
     if  style.content == '文字':
-        mark = label_mark(anchor, scaler, style.font, style.fcolor, style.ftext)
+        mark = label_mark(anchor, scaler, resources.get_font(style.font), style.color, style.text)
     else:
         mark = image_mark(anchor, scaler, style.psource, style.opacity)
     return mark

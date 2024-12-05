@@ -19,13 +19,15 @@ from datetime import datetime
 
 #region 变量
 
-CONFIG = config.get('species_label', {
-    'size'      : '2K',
-    'shadow'    : False,
-    'radius'    : False,
-    'watermark' : False,
-    'wstyle'    : watermark.style.default()
-})
+CONFIG = config.get('species_label', [
+    config.field('size',      '2K'),
+    config.field('shadow',    False),
+    config.field('sstyle',    shadow.style.DEFAULT,       shadow.style.self_validate),
+    config.field('round',     False),
+    config.field('rstyle',    round_corner.style.DEFAULT, round_corner.style.self_validate),
+    config.field('watermark', False),
+    config.field('wstyle',    watermark.style.DEFAULT,    watermark.style.self_validate),
+])
 
 targets       = []
 species_name  = lstr.lstr()
@@ -62,11 +64,11 @@ def main():
     m.add(menu.splitter('- 样式设置 -'))
     m.add(menu.option('S', '图像尺寸',     s_main, s_value))
     m.add(menu.option('E', '图像阴影',     e_main, e_value))
-    m.add(menu.option('H', '阴影效果…',    shadow.style_main, enfunc=lambda: CONFIG.shadow))
+    m.add(menu.option('H', '阴影效果…',    CONFIG.sstyle.set, enfunc=lambda: CONFIG.shadow))
     m.add(menu.option('A', '图像水印',     a_main, a_value))
     m.add(menu.option('W', '水印样式…',    CONFIG.wstyle.set, enfunc=lambda: CONFIG.watermark))
     m.add(menu.option('R', '图像圆角',     r_main, r_value))
-    m.add(menu.option('Y', '圆角半径',     round_corner.radius_main, round_corner.radius_value, enfunc=lambda: CONFIG.radius))
+    m.add(menu.option('P', '圆角参数',     CONFIG.rstyle.set, enfunc=lambda: CONFIG.round))
     m.add(menu.option('Y', '保存当前设置', lambda: config.save(CONFIG)))
     m.add(menu.splitter('- 导入与导出 -'))
     m.add(menu.option('C', '选择目标图像…', choose_targets))
@@ -222,13 +224,13 @@ def r_main():
     m.run()
 
 def r_enable():
-    CONFIG.radius = True
+    CONFIG.round = True
 
 def r_disable():
-    CONFIG.radius = False
+    CONFIG.round = False
 
 def r_value() -> str:
-    return '启用' if CONFIG.radius else '关闭'
+    return '启用' if CONFIG.round else '关闭'
 
 #endregion
 
@@ -324,11 +326,11 @@ def process(img: Image.Image) -> Image.Image:
         ratio = img.height / img.width
         img   = img.resize((twidth, round(twidth * ratio)))
     
-    if CONFIG.radius:
-        img = round_corner.process(img)
+    if CONFIG.round:
+        img = round_corner.process(CONFIG.rstyle, img)
     
     if CONFIG.shadow:
-        img = shadow.process(img)
+        img = shadow.process(CONFIG.sstyle, img)
     
     params = get_params(img.size)
     final = Image.new('RGBA', (img.width + params['pic_margin'] * 2, img.height + params['pic_margin'] + params['pic_bottom']), 'white')
@@ -382,7 +384,7 @@ def process(img: Image.Image) -> Image.Image:
         final.paste(gimg, (int(x), int(y)), gimg)
     
     if CONFIG.watermark:
-        final = watermark.process(final)
+        final = watermark.process(CONFIG.wstyle, final)
     
     return final
 

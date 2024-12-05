@@ -6,7 +6,7 @@
 
 > ***Visurus*** is the future participle form of the Latin verb ***videō*** (to see).
 
-*Visurus* 是一个批量图像格式化、图像拼接和添加水印的开源工具。
+*Visurus* 是一个图像批量格式化、图像拼接和添加水印的开源工具。
 
 ## 功能展示
 ### 图像格式化

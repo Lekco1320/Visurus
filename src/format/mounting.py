@@ -10,13 +10,13 @@ from PIL import Image
 
 targets: list[image] = []
 
-CONFIG = config.get('mounting', {
-    'width'     : 0.1,
-    'height'    : 0.08,
-    'color'     : color('#FFFFFFFF'),
-    'watermark' : False,
-    'wstyle'    : watermark.style.default()
-})
+CONFIG = config.get('mounting', [
+    config.field('width',     0.1),
+    config.field('height',    0.08),
+    config.field('color',     color('#FFFFFFFF')),
+    config.field('watermark', False),
+    config.field('wstyle',    watermark.style.default(), watermark.style.self_validate)
+])
 
 @errhandler
 def main():

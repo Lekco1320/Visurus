@@ -15,9 +15,9 @@ from util import workspace
 @errhandler
 def main():
     m = menu.menu('Lekco Visurus', 'Q')
-    m.add(menu.option('F', '图像格式化…', format.main))
+    m.add(menu.option('F', '图像格式化…', format.main_menu))
     m.add(menu.option('S', '图像拼接…',   stitching.main))
-    m.add(menu.option('T', '添加水印…',   watermark.main))
+    m.add(menu.option('T', '添加水印…',   watermark.main_menu))
     m.add(menu.option('W', '工作区…',     workspace.main))
     m.add(menu.option('O', '设置…',       setting.main))
     m.add(menu.option('A', '关于',        about.main))
