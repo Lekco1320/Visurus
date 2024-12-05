@@ -1,108 +1,88 @@
 from util import *
 from util import config
 from util import menu
-from util import output
-from util import workspace
 
 from PIL import Image
 from PIL import ImageFilter
 
-targets = []
-
-CONFIG = config.get('shadow', {
-    'color'  : color('#0000007F'),
-    'offset' : (10, 10),
-    'limit'  : (8, 8),
-    'blur'   : 5,
-})
-
-def main():
-    targets.clear()
+class style(config.config):
+    FIELDS = [
+        config.field('color',  color('#0000007F')),
+        config.field('offset', (10, 10)),
+        config.field('limit',  (8, 8)),
+        config.field('blur',   5),
+    ]
     
-    m = menu.menu('Lekco Visurus - 添加阴影', 'Q')
-    m.add(menu.display(display))
-    m.add(menu.option('C', '选择目标图像…', choose_targets))
-    m.add(menu.option('S', '阴影效果…',     style_main))
-    m.add(menu.option('Y', '保存当前设置',  lambda: config.save(CONFIG)))
-    m.add(menu.option('O', '执行导出…',     execute))
-    m.add(menu.option('Q', '返回'))
-    m.run()
-
-def display():
-    print_left(f'已选择 {len(targets)} 张目标图像:')
-    for i in range(len(targets)):
-        print_left(f'{i + 1}. ' + targets[i].formated_name())
-    print_spliter()
-
-# 选择图片对象
-def choose_targets():
-    global targets
-    targets = workspace.c_main()
-
-@errhandler
-def execute():
-    if len(targets) <= 0:
-        raise ValueError('目标图像为空.')
+    DEFAULT = None
     
-    out = []
-    for srcimg in targets:
-        print_output(f'正在处理 {srcimg.name}...')
-        processed = process(srcimg.image)
-        out.append(output.outimage(processed, srcimg))
+    @classmethod
+    def default(cls) -> 'style':
+        ret = style()
+        ret.validate(style.FIELDS)
+        return ret
     
-    if len(out) > 0:
-        output.main(out)
+    def __init__(self) -> None:
+        super().__init__('')
+        self.validate(style.FIELDS)
+    
+    def self_validate(self) -> bool:
+        return super().validate(style.FIELDS)
 
-def style_main():
+    def set(self):
+        style_main(self)
+
+style.DEFAULT = style.default()
+
+def style_main(style: style):
     m = menu.menu('Lekco Visurus - 阴影效果', 'Q')
-    m.add(menu.option('C', '阴影颜色', set_color,  get_color))
-    m.add(menu.option('O', '阴影偏移', set_offset, get_offset))
-    m.add(menu.option('L', '范围限制', set_limit,  get_limit))
-    m.add(menu.option('B', '模糊程度', set_blur,   get_blur))
+    m.add(menu.option('C', '阴影颜色', lambda: set_color(style),  lambda: get_color(style)))
+    m.add(menu.option('O', '阴影偏移', lambda: set_offset(style), lambda: get_offset(style)))
+    m.add(menu.option('L', '范围限制', lambda: set_limit(style),  lambda: get_limit(style)))
+    m.add(menu.option('B', '模糊程度', lambda: set_blur(style),   lambda: get_blur(style)))
     m.add(menu.option('Q', '返回'))
     m.run()
 
-def set_color():
-    CONFIG.color = color.input()
+def set_color(style: style):
+    style.color = color.input()
 
-def get_color() -> str:
-    return CONFIG.color.__str__()
+def get_color(style: style) -> str:
+    return style.color.hex
 
 @errhandler
-def set_offset():
+def set_offset(style: style):
     print_output('请输入偏移量 x,y :')
     ans = list(map(int, get_input().split(',')))
     if len(ans) != 2:
         raise ValueError(f'错误的坐标分量数 \'{len(ans)}\'.')
-    CONFIG.offset = (ans[0], ans[1])
+    style.offset = (ans[0], ans[1])
 
-def get_offset() -> str:
-    return CONFIG.offset.__str__()
+def get_offset(style: style) -> str:
+    return style.offset.__str__()
 
 @errhandler
-def set_limit():
+def set_limit(style: style):
     print_output('请输入范围限制 x,y:')
     ans = list(map(int, get_input().split(',')))
     if len(ans) != 2:
         raise ValueError(f'错误的坐标分量数 \'{len(ans)}\'.')
-    CONFIG.limit = (ans[0], ans[1])
+    style.limit = (ans[0], ans[1])
 
-def get_limit() -> str:
-    return CONFIG.limit.__str__()
+def get_limit(style: style) -> str:
+    return style.limit.__str__()
 
 @errhandler
-def set_blur():
+def set_blur(style: style):
     print_output('请输入模糊程度(>=0):')
     ans = int(get_input())
     if ans < 0:
         raise ValueError(f'模糊程度 \'{ans}\' 无效.')
-    CONFIG.blur = ans
+    style.blur = ans
 
-def get_blur() -> str:
-    return CONFIG.blur.__str__()
+def get_blur(style: style) -> str:
+    return style.blur.__str__()
 
-def process(image: Image.Image) -> Image.Image:
-    return _blur(image, CONFIG.offset, CONFIG.limit, CONFIG.color, CONFIG.blur)
+def process(style: style, image: Image.Image) -> Image.Image:
+    return _blur(image, style.offset, style.limit, style.color, style.blur)
 
 # https://code.activestate.com/recipes/474116-drop-shadows-with-pil/
 def _blur(image: Image.Image, offset: tuple, limit: tuple, color: color, depth: int) -> Image.Image:

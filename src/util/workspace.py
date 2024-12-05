@@ -6,7 +6,7 @@ from util import menu
 from PIL  import Image
 from PIL  import ImageTk
 
-SUPPORTED = ['.jpg', '.jpeg', '.png', '.bmp', '.gif','.ico', '.psd', '.webp', '.tif', '.tiff']
+SUPPORTED = ['.jpg', '.jpeg', '.png', '.bmp', '.gif', '.ico', '.psd', '.webp', '.tif', '.tiff']
 
 images: list[image] = []
 

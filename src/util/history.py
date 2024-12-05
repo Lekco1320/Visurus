@@ -54,4 +54,10 @@ def history(key: str):
         return wrapper
     return decorator
 
+def nohistory(func):
+    def wrapper(*args, **kwargs):
+        readline.clear_history()
+        return func(*args, **kwargs)
+    return wrapper
+
 read_history()

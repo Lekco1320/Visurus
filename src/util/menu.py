@@ -154,6 +154,7 @@ class menu:
     def exit(self):
         self._flag = False
     
+    @nohistory
     def run(self):
         while self._flag:
             true_clear_screen()

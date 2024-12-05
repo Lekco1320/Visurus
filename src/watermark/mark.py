@@ -128,5 +128,5 @@ class label_mark(markbase):
         font = ImageFont.truetype(self._font, self._font_size)
         text = Image.new('RGBA', image.size, (0, 0, 0, 0))
         draw = ImageDraw.Draw(text)
-        draw.text(position, self._text, self._color, font)
+        draw.text(position, self._text, self._color.tuple, font)
         return Image.alpha_composite(image, text)

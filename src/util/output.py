@@ -12,11 +12,18 @@ from datetime import datetime
 images: list[outimage] = []
 chosen: list[int]      = []
 
-CONFIG = config.get('output', {
-    'dir'      : '桌面',
-    'format'   : '*.JPG',
-    'filename' : R'o_{N}{E}'
-})
+FORMAT_MAP = {
+    '*.JPG': 'JPEG',
+    '*.PNG': 'PNG',
+    '*.BMP': 'BMP',
+    '*.GIF': 'GIF',
+}
+
+CONFIG = config.get('output', [
+    config.field('dir',      '桌面'),
+    config.field('format',   '*.JPG'),
+    config.field('filename', 'o_{N}{E}'),
+])
 
 def init(imgs: list[outimage]):
     global images, chosen
@@ -178,13 +185,6 @@ def generate_filename(path: str) -> str:
         'S': time.second
     }
     return CONFIG.filename.format_map({key : info[key] for key in info.keys()})
-
-FORMAT_MAP = {
-    '*.JPG': 'JPEG',
-    '*.PNG': 'PNG',
-    '*.BMP': 'BMP',
-    '*.GIF': 'GIF',
-}
 
 def output():
     print_output('正在导出图像...')

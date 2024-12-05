@@ -8,14 +8,14 @@ from PIL import Image
 
 targets: list[image] = []
 
-CONFIG = config.get('stitching', {
-    'direction'  : '垂直方向',
-    'clip'       : '扩展至最长边',
-    'halign'     : '左对齐',
-    'valign'     : '顶部对齐',
-    'spacing'    : 0,
-    'background' : color('#FFFFFFFF')
-})
+CONFIG = config.get('stitching', [
+    config.field('direction',  '垂直方向'),
+    config.field('clip',       '扩展至最长边'),
+    config.field('halign',     '左对齐'),
+    config.field('valign',     '顶部对齐'),
+    config.field('spacing',    0),
+    config.field('background', color('#FFFFFFFF')),
+])
 
 def main():
     m = menu.menu('Lekco Visurus - 图像拼接', 'Q')
