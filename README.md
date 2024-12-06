@@ -28,47 +28,35 @@
 ### 首选项
 * 用户可根据喜好调整各功能的首选项
 
-## 安装与使用
-### Windows
-* 请先安装Python环境(>=3.11)和pip。
-* 点击[Release](https://github.com/Lekco1320/Visurus/releases)
-下载对应版本的压缩包`Source code.zip`或`Source code.tar.gz`。
-* 解压到除系统盘外的任意磁盘下，使用终端打开文件夹`src`，执行安装命令：
-``` bash
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-deactivate
-```
+## 简易安装
 
-* 运行脚本时，进入`src`文件夹，执行命令：
-``` bash
-venv\Scripts\activate
-python ./main.py
+下载对应操作系统的最新版压缩包
+[Release](https://github.com/Lekco1320/Visurus/releases)
+，解压后运行可执行程序即完成安装。
+
+## 脚本安装
+### Windows
+下载最新版 [Release](https://github.com/Lekco1320/Visurus/releases)
+并解压到安装目录，进入`src`文件夹，打开终端，执行以下命令：
+``` batch
+./run.bat
 ```
+接着根据脚本的指引完成程序安装和运行。
 
 ### Unix系统 (MacOS, Linux, etc.)
-* 请先安装Python环境(>=3.11)和pip。
-* 启动终端，执行安装命令：
+下载最新版 [Release](https://github.com/Lekco1320/Visurus/releases)
+并解压到安装目录，进入`src`文件夹，打开`bash`，执行以下命令：
 ``` bash
-git clone --depth 1 https://github.com/Lekco1320/Visurus.git ./Visurus
-cd ./Visurus
-python3 -m venv ./venv
-source ./venv/bin/activate
-pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-python3 ./main.py
+source ./run.sh
 ```
+接着根据脚本的指引完成程序安装和运行。
 
-* 运行脚本时，进入`src`文件夹，执行命令：
-``` bash
-source ./venv/bin/activate
-python3 ./main.py
-```
+## 编译可执行文件
+[Nuitka](https://nuitka.net/) 编译脚本提供在`tools`文件夹中。
 
 ## 许可声明
-Visurus基于 [Apache License 2.0](LICENSE) 发布。
+Visurus基于 [Apache License 2.0](LICENSE) 发布，并引用：
 
-Visurus引用了：
 * [Pillow](https://python-pillow.org/)，其发布基于
 [License](https://github.com/python-pillow/Pillow/blob/main/LICENSE) .
 * [pyreadline3](https://github.com/pyreadline3/pyreadline3)，其发布基于
