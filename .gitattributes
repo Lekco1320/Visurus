@@ -1,11 +1,13 @@
 *     text=auto
 
 *.py  text eol=lf
-*.py  text eol=lf
 *.md  text eol=lf
+*.sh  text eol=lf
 *.txt text eol=lf
+*.bat text eol=lf
 
 *.png binary
 *.jpg binary
 *.ttf binary
 *.otf binary
+*.ico binary

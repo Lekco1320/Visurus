@@ -1,5 +1,7 @@
 **/__pycache__/
 /**/*.pyc
-/config.ini
+/venv/
 /clear.ps1
 /test.py
+/Visurus.exe
+/Visurus

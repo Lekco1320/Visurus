@@ -1,6 +1,2 @@
-/reference
-/output
-/logo
-/backup
-/output.txt
-/config.ini
+**/.vscode/
+**/.DS_Store
