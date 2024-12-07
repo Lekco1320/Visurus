@@ -272,6 +272,9 @@ class ansi_stream:
             index -= astr.__len__()
         raise IndexError('Index out of range.')
 
+strLike     = Union[str, ansi_str]
+strOrStream = Union[str, ansi_str, ansi_stream]
+
 FORMAT_VALUE   = ansi_format(foreground=color.CYAN)
 FORMAT_TITLE   = ansi_format(style.BOLD, color.WHITE)
 FORMAT_ERROR   = ansi_format(foreground=color.RED)

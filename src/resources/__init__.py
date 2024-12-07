@@ -1,10 +1,9 @@
-from .main import font, icon, get_font, get_icon, check
+from .main import font, icon, get, font_main, RESOURCE_FOLDER
 
 __all__ = [
     "font",
     "icon",
-    "get_font",
-    "get_icon"
+    "get",
+    "font_main",
+    "RESOURCE_FOLDER",
 ]
-
-check()

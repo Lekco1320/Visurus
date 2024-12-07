@@ -2,8 +2,8 @@ import os
 import time
 import unicodedata
 
-from util   import ansi
-from typing import overload, Union
+from .ansi  import *
+from typing import overload
 
 FULL_CHAR_WIDTH = 2
 
@@ -22,14 +22,14 @@ def text_width(text: str) -> int:
     ...
 
 @overload
-def text_width(text: ansi.ansi_str) -> int:
+def text_width(text: ansi_str) -> int:
     ...
 
 @overload
-def text_width(text: ansi.ansi_stream) -> int:
+def text_width(text: ansi_stream) -> int:
     ...
 
-def text_width(text: Union[str, ansi.ansi_str, ansi.ansi_stream]) -> int:
+def text_width(text: strOrStream) -> int:
     width = 0
     for c in text:
         width += FULL_CHAR_WIDTH if is_full_width_char(c) else 1
@@ -40,25 +40,24 @@ def wrap_text(text: str, width: int) -> str:
     ...
 
 @overload
-def wrap_text(text: ansi.ansi_str, width: int) -> ansi.ansi_str:
+def wrap_text(text: ansi_str, width: int) -> ansi_str:
     ...
 
 @overload
-def wrap_text(text: ansi.ansi_stream, width: int) -> ansi.ansi_stream:
+def wrap_text(text: ansi_stream, width: int) -> ansi_stream:
     ...
 
-def wrap_text(text: Union[str, ansi.ansi_str, ansi.ansi_stream], width: int) \
-    -> Union[str, ansi.ansi_str, ansi.ansi_stream]:
+def wrap_text(text: strOrStream, width: int) -> strOrStream:
     if width <= 0:
         raise ValueError("Width must be greater than 0.")
     
     if isinstance(text, str):
         return _wrap_text_str(text, width)
-    if isinstance(text, ansi.ansi_str):
+    if isinstance(text, ansi_str):
         text = text.copy()
         text.str = _wrap_text_str(text.str, width)
         return text
-    if isinstance(text, ansi.ansi_stream):
+    if isinstance(text, ansi_stream):
         return _wrap_text_ansi_stream(text, width)
 
 def _wrap_cannot_break(char: str) -> bool:
@@ -103,7 +102,7 @@ def _wrap_text_str(text: str, width: int, offset: int = 0) -> str:
     lines.append(text)
     return '\n'.join(lines)
 
-def _wrap_text_ansi_stream(stream: ansi.ansi_stream, width: int) -> ansi.ansi_stream:
+def _wrap_text_ansi_stream(stream: ansi_stream, width: int) -> ansi_stream:
     astrs  = []
     offset = 0
     for astr in stream._astrs:
@@ -117,9 +116,9 @@ def _wrap_text_ansi_stream(stream: ansi.ansi_stream, width: int) -> ansi.ansi_st
                 break
             offset += 1
 
-    return ansi.ansi_stream(astrs)
+    return ansi_stream(astrs)
 
-def print_wrap(text: Union[str, ansi.ansi_str, ansi.ansi_stream]):
+def print_wrap(text: strOrStream):
     print(wrap_text(text, SPLITER_LENGTH))
 
 @overload
@@ -127,16 +126,16 @@ def center(text: str, width: int) -> str:
     ...
 
 @overload
-def center(text: ansi.ansi_str, width: int) -> ansi.ansi_str:
+def center(text: ansi_str, width: int) -> ansi_str:
     ...
 
-def center(text: str | ansi.ansi_str, width: int):
+def center(text: strLike, width: int):
     length = text_width(text)
     left   = int((width - 2 - length) / 2)
     right  = width - 2 - length - left
     return '*' + ' ' * left + text + ' ' * right + '*'
 
-def print_center(text: str | ansi.ansi_str):
+def print_center(text: strLike):
     print(center(text, SPLITER_LENGTH))
 
 SPLITER_LENGTH = 47
@@ -145,12 +144,12 @@ def print_spliter():
     print('*' * SPLITER_LENGTH)
 
 def clear_line():
-    print(f'{ansi.ansi_format.CONTROL_CODE}2K', end='')
-    print(f'{ansi.ansi_format.format.CONTROL_CODE}H',  end='')
+    print(f'{ansi_format.CONTROL_CODE}2K', end='')
+    print(f'{ansi_format.format.CONTROL_CODE}H',  end='')
 
 def clear_screen():
-    print(f'{ansi.ansi_format.CONTROL_CODE}2J',   end='')
-    print(f'{ansi.ansi_format.CONTROL_CODE}1;1H', end='')
+    print(f'{ansi_format.CONTROL_CODE}2J',   end='')
+    print(f'{ansi_format.CONTROL_CODE}1;1H', end='')
 
 def true_clear_screen(): 
     if os.name == 'posix':
@@ -161,24 +160,24 @@ def true_clear_screen():
 def up_line():
     print('\033[1A', end='')
 
-def left(text: str | ansi.ansi_str | ansi.ansi_stream):
+def left(text: strOrStream):
     length = text_width(text)
     right  = SPLITER_LENGTH - 3 - length
     return '* ' + text + ' ' * right + '*'
 
-def print_left(text: str | ansi.ansi_str | ansi.ansi_stream):
+def print_left(text: strOrStream):
     print(left(text))
 
-def print_subtitle(text: str | ansi.ansi_str | ansi.ansi_stream):
+def print_subtitle(text: strOrStream):
     print_spliter()
-    print_center(ansi.ansi_str(text, ansi.FORMAT_TITLE))
+    print_center(ansi_str(text, FORMAT_TITLE))
 
-def print_title(text: str | ansi.ansi_str | ansi.ansi_stream):
+def print_title(text: strOrStream):
     print_subtitle(text)
     print_spliter()
 
 def kv(key: str, value: str = None):
-    fstr = ansi.ansi_str('', ansi.FORMAT_VALUE)
+    fstr = ansi_str('', FORMAT_VALUE)
     main = f'{key}'
     if value != None:
         main += ': '
@@ -188,28 +187,28 @@ def kv(key: str, value: str = None):
 def print_kv(key: str, value: str = None):
     return print_left(kv(key, value))
 
-def print_option(key: str | ansi.ansi_str, text: str | ansi.ansi_str, value: str = None):
+def print_option(key: strLike, text: strLike, value: str = None):
     kv_str = kv(text, value)
-    print_left(ansi.ansi_str(f'{key}', ansi.FORMAT_OPTION) + ' | ' + kv_str)
+    print_left(ansi_str(f'{key}', FORMAT_OPTION) + ' | ' + kv_str)
 
-def get_input(text: str | ansi.ansi_str = '') -> str:
+def get_input(text: strLike = '') -> str:
     return input(f'< {text}')
 
-def print_output(text: str | ansi.ansi_str):
+def print_output(text: strLike):
     print(f'> {text}')
 
 def print_ps(text: str):
-    print_output(ansi.ansi_str('* ' + text, ansi.FORMAT_PS))
+    print_output(ansi_str('* ' + text, FORMAT_PS))
 
 def wait(t: float = 1.5):
     time.sleep(t)
 
 def print_error(ex: str):
-    print_output(ansi.ansi_str('[错误] ' + ex, ansi.FORMAT_ERROR))
+    print_output(ansi_str('[错误] ' + ex, FORMAT_ERROR))
     wait()
 
 def print_success(text: str):
-    print_output(ansi.ansi_str(text, ansi.FORMAT_SUCCESS))
+    print_output(ansi_str(text, FORMAT_SUCCESS))
     wait(1.0)
 
 def compress_path(path: str, length: int) -> str:
@@ -223,7 +222,7 @@ def compress_path(path: str, length: int) -> str:
     if len(parts) == 0:
         return path
     if len(parts) > 2: 
-        ret = os.path.join(parts[0], '...', parts[-1])
+        ret = os.path.join(parts[0], os.sep, '...', parts[-1])
     if len(parts) == 2 or text_width(ret) > length:
         ret = os.path.join('...', parts[-1])
     if text_width(ret) <= length:
@@ -235,3 +234,9 @@ def compress_path(path: str, length: int) -> str:
     while text_width(ret) + 3 > length: 
         ret = ret[1:]
     return f'...{ret}'
+
+def auto_compress_path(format_str: str, path: str) -> str:
+    count       = format_str.count('{}')
+    placeholder = format_str.replace('{}', '')
+    length      = (SPLITER_LENGTH - text_width(placeholder)) / (count if count > 0 else count == 1)
+    return compress_path(path, length)

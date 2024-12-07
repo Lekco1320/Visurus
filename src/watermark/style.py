@@ -16,7 +16,7 @@ class style(config.config):
         config.field('psource',  '无'),
         config.field('opacity',  100),
         config.field('aligns',   ['居中对齐', '底部对齐']),
-        config.field('scale',    ['固定尺寸', ('*', '*')]),
+        config.field('scale',    ['固定尺寸', ('*', 20)]),
         config.field('position', '图像下中央'),
         config.field('offset',   (0, 0))
     ]
@@ -84,12 +84,10 @@ def w_value(style: style) -> str:
 
 @errhandler
 def f_main(style: style):
-    print_output('请输入字体名:')
-    f = get_input()
-    style.font = f
+    style.font = resources.font_main(style.font)
 
 def f_value(style: style) -> str:
-    return style.font.__str__()
+    return auto_compress_path('* F | 水印字体: {} *', style.font.__str__())
 
 #endregion
 

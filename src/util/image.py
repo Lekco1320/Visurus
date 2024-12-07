@@ -75,7 +75,7 @@ class image:
         return formatfunc(value) if value != None else default
     
     def formated_name(self) -> ansi.ansi_stream:
-        return compress_path(self._path, SPLITER_LENGTH - text_width('* xx.  @0000x0000 *')) + \
+        return auto_compress_path('* xx. {} @0000x0000 *', self._path) + \
                ansi.ansi_str(f' @{self._width}x{self._height}', ansi.FORMAT_ANNO)
 
 class outimage:
@@ -105,5 +105,5 @@ class outimage:
         self._img = self._img.convert(mode)
     
     def formated_name(self) -> ansi.ansi_stream:
-        return compress_path(self._name, SPLITER_LENGTH - text_width('* xx.  @0000x0000 *')) + \
+        return auto_compress_path('* xx. {} @0000x0000 *', self._name) + \
                ansi.ansi_str(f' @{self._width}x{self._height}', ansi.FORMAT_ANNO)

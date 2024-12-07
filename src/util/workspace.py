@@ -108,8 +108,9 @@ def input_file_or_folder(path: str):
 
 @errhandler
 def input_dialog():
+    print_output('已启动文件选择器.')
     from tkinter import filedialog
-    filetypes = [('Image Files', ';'.join('*' + ext for ext in SUPPORTED))]
+    filetypes = [('图像文件', ';'.join('*' + ext for ext in SUPPORTED))]
     filenames = filedialog.askopenfilenames(title='导入图像', initialdir='/', filetypes=filetypes)
     for file in filenames:
         if file not in images:

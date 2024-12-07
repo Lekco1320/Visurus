@@ -1,3 +1,5 @@
+import resources
+
 from .        import menu
 from .        import config
 from .        import errhandler
@@ -6,10 +8,15 @@ from .history import clear_history
 
 def main():
     m = menu.menu('Lekco Visurus - 设置', 'Q')
+    m.add(menu.display(display))
     m.add(menu.option('R', '恢复默认设置', restore_config))
     m.add(menu.option('C', '清除输入记录', clear_input_history))
     m.add(menu.option('Q', '返回'))
     m.run()
+
+def display():
+    print_kv('资源路径', auto_compress_path('* 资源目录: {} *', str(resources.RESOURCE_FOLDER)))
+    print_spliter()
 
 @errhandler
 def restore_config():

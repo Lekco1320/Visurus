@@ -96,7 +96,7 @@ def get_anchor(style: style, position: tuple[int, int]) -> anchor:
 def get_mark(style: style, anchor: anchor, scaler: scaler) -> markbase:
     mark = None
     if  style.content == '文字':
-        mark = label_mark(anchor, scaler, resources.get_font(style.font), style.color, style.text)
+        mark = label_mark(anchor, scaler, resources.get(style.font), style.color, style.text)
     else:
         mark = image_mark(anchor, scaler, style.psource, style.opacity)
     return mark
