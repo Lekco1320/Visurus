@@ -16,6 +16,12 @@ class wrapper:
         else:
             self._data = value
     
+    def set(self, value):
+        self.data = value
+    
+    def get(self):
+        return self.data
+    
     def __repr__(self):
         return f'wrapper{{{repr(self._data)}}}'
 

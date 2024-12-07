@@ -34,6 +34,7 @@ __all__ = [
     "print_error",
     "print_success",
     "compress_path",
+    "auto_compress_path",
     "SPLITER_LENGTH",
     "history",
     "nohistory",

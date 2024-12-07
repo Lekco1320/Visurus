@@ -112,7 +112,7 @@ def d_disk():
     CONFIG.dir = filedialog.askdirectory()
 
 def d_value() -> str:
-    return compress_path(CONFIG.dir, SPLITER_LENGTH - text_width('* D | 导出路径:  *'))
+    return auto_compress_path('* D | 导出路径: {} *', CONFIG.dir)
 
 def f_main():
     m = menu.menu('Lekco Visurus - 导出格式')
