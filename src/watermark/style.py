@@ -87,7 +87,7 @@ def f_main(style: style):
     style.font = resources.font_main(style.font)
 
 def f_value(style: style) -> str:
-    return auto_compress_path('* F | 水印字体: {} *', style.font.__str__())
+    return fomit_path('* F | 水印字体: {} *', style.font.__str__())
 
 #endregion
 
@@ -109,7 +109,7 @@ def set_text(style: style):
     style.text = get_input()
 
 def get_text(style: style) -> str:
-    return style.text
+    return fomit_str('* T | 水印内容: {} *', style.text)
 
 #endregion
 

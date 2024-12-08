@@ -105,7 +105,7 @@ def select_internal_font(value: wrapper):
 def select_font(value: wrapper):
     print_output('已启动文件选择器.')
     from tkinter import filedialog
-    fonttypes = [('Image Files', '*.otf;*.ttf')]
+    fonttypes = [('字体文件', '*.otf;*.ttf')]
     fontfile  = filedialog.askopenfilename(title='选择字体', initialdir='/', filetypes=fonttypes)
     ret = Path(fontfile)
     if not ret.exists():

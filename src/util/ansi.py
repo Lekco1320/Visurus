@@ -156,8 +156,11 @@ class ansi_str:
     def __len__(self) -> int:
         return self._str.__len__()
     
-    def __getitem__(self, index) -> 'str':
-        return self._str[index]
+    def __getitem__(self, key) -> 'str':
+        if isinstance(key, slice):
+            start, stop, step = key.start, key.stop, key.step
+            return self._str[start:stop:step]
+        return self._str[key]
 
     def __eq__(self, value: object) -> bool:
         if not isinstance(value, ansi_str):
@@ -265,11 +268,16 @@ class ansi_stream:
                 ret._astrs.append(astr)
             return ret
     
-    def __getitem__(self, index) -> str:
+    def __getitem__(self, key) -> str:
+        if isinstance(key, slice):
+            plain = ''.join([a._str for a in self._astrs])
+            start, stop, step = key.start, key.stop, key.step
+            return plain[start:stop:step]
+        
         for astr in self._astrs:
-            if 0 <= index < astr.__len__():
-                return astr[index]
-            index -= astr.__len__()
+            if 0 <= key < astr.__len__():
+                return astr[key]
+            key -= astr.__len__()
         raise IndexError('Index out of range.')
 
 strLike     = Union[str, ansi_str]

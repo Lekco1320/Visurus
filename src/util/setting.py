@@ -15,7 +15,7 @@ def main():
     m.run()
 
 def display():
-    print_kv('资源路径', auto_compress_path('* 资源目录: {} *', str(resources.RESOURCE_FOLDER)))
+    print_kv('资源路径', fomit_path('* 资源目录: {} *', str(resources.RESOURCE_FOLDER)))
     print_spliter()
 
 @errhandler
