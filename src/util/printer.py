@@ -2,8 +2,9 @@ import os
 import time
 import unicodedata
 
-from .ansi  import *
-from typing import overload
+from .ansi   import *
+from typing  import overload
+from pathlib import Path
 
 FULL_CHAR_WIDTH = 2
 
@@ -16,6 +17,9 @@ def is_full_width_char(char: str) -> bool:
         raise ValueError("Input must be a single character.")
     width = unicodedata.east_asian_width(char)
     return width in ('F', 'W')
+
+def char_width(char: str) -> int:
+    return FULL_CHAR_WIDTH if is_full_width_char(char) else 1
 
 @overload
 def text_width(text: str) -> int:
@@ -32,7 +36,7 @@ def text_width(text: ansi_stream) -> int:
 def text_width(text: strOrStream) -> int:
     width = 0
     for c in text:
-        width += FULL_CHAR_WIDTH if is_full_width_char(c) else 1
+        width += char_width(c)
     return width
 
 @overload
@@ -211,32 +215,59 @@ def print_success(text: str):
     print_output(ansi_str(text, FORMAT_SUCCESS))
     wait(1.0)
 
-def compress_path(path: str, length: int) -> str:
+def omit_str(s: str, length: int) -> str:
+    leng = len(s)
+    if text_width(s) <= length:
+        return s
+    if length <= 3:
+        return '*' * length
+    
+    length -= 3
+    start   = 4
+    while start < leng and text_width(s[start:]) > length:
+        start += 1
+    return f'...{s[start:]}'
+
+def fomit_str(fstr: str, s: str) -> str:
+    count       = fstr.count('{}')
+    placeholder = fstr.replace('{}', '')
+    length      = int(SPLITER_LENGTH - text_width(placeholder)) / (count if count > 0 else count == 1)
+    return omit_str(s, int(length))
+
+pathLike = Union[str, Path]
+
+def omit_path(path: pathLike, length: int) -> str:
+    if isinstance(path, Path):
+        path = str(path)
+    
     path = os.path.normpath(path)
     if text_width(path) <= length:
         return path
+    if length <= 3:
+        return '*' * length
     
     parts = path.split(os.sep)
-    ret   = path
+    leng  = len(parts)
     
-    if len(parts) == 0:
-        return path
-    if len(parts) > 2: 
-        ret = os.path.join(parts[0], os.sep, '...', parts[-1])
-    if len(parts) == 2 or text_width(ret) > length:
-        ret = os.path.join('...', parts[-1])
-    if text_width(ret) <= length:
-        return ret
-    if len(parts[-1]) <= 3:
-        return f'...{ret}'
+    if leng == 0:
+        return f'...{path[-(length - 3):]}'
+    if leng == 1 or text_width(parts[-1]) > length - 4:
+        return f'...{parts[-1][-(length - 3):]}'
+    if parts[0].endswith(':'):
+        parts[0] += os.sep
     
-    ret = parts[-1][3:]
-    while text_width(ret) + 3 > length: 
-        ret = ret[1:]
-    return f'...{ret}'
+    end = leng - 2
+    ret = ''
+    while end >= 0:
+        seps = parts[:end]
+        ret  = os.path.join(*seps, '...', parts[-1])
+        if text_width(ret) <= length:
+            return ret
+        end -= 1
+    return ret
 
-def auto_compress_path(format_str: str, path: str) -> str:
-    count       = format_str.count('{}')
-    placeholder = format_str.replace('{}', '')
+def fomit_path(fstr: str, path: pathLike) -> str:
+    count       = fstr.count('{}')
+    placeholder = fstr.replace('{}', '')
     length      = (SPLITER_LENGTH - text_width(placeholder)) / (count if count > 0 else count == 1)
-    return compress_path(path, length)
+    return omit_path(path, int(length))
