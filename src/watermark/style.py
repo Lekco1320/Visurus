@@ -124,7 +124,7 @@ def set_psource(style: style):
     style.psource = ans
 
 def get_psource(style: style) -> str:
-    return style.psource
+    return fomit_path('* S | 图片源: {} *', style.psource)
 
 #endregion
 
@@ -339,7 +339,7 @@ def p_random(style: style):
     style.position = '随机'
 
 def p_value(style: style) -> str:
-    return style.position
+    return style.position.__str__()
 
 #endregion
 

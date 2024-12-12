@@ -217,21 +217,24 @@ def print_success(text: str):
 
 def omit_str(s: str, length: int) -> str:
     leng = len(s)
+    if length < 1:
+        return ''
     if text_width(s) <= length:
         return s
-    if length <= 3:
-        return '*' * length
     
-    length -= 3
-    start   = 4
-    while start < leng and text_width(s[start:]) > length:
-        start += 1
-    return f'...{s[start:]}'
+    end = leng - 2
+    ret = s[:end]
+    while end > 0 and text_width(ret) >= length:
+        end -= 1
+        ret  = s[:end]
+    return f'{s[:end]}…'
 
 def fomit_str(fstr: str, s: str) -> str:
     count       = fstr.count('{}')
     placeholder = fstr.replace('{}', '')
-    length      = int(SPLITER_LENGTH - text_width(placeholder)) / (count if count > 0 else count == 1)
+    if count <= 0:
+        count = 1
+    length = (SPLITER_LENGTH - text_width(placeholder)) / count
     return omit_str(s, int(length))
 
 pathLike = Union[str, Path]
@@ -241,33 +244,35 @@ def omit_path(path: pathLike, length: int) -> str:
         path = str(path)
     
     path = os.path.normpath(path)
+    if length < 1:
+        return ''
     if text_width(path) <= length:
         return path
-    if length <= 3:
-        return '*' * length
     
     parts = path.split(os.sep)
     leng  = len(parts)
     
     if leng == 0:
-        return f'...{path[-(length - 3):]}'
-    if leng == 1 or text_width(parts[-1]) > length - 4:
-        return f'...{parts[-1][-(length - 3):]}'
+        return f'…{path[-(length - 1):]}'
+    if leng == 1 or text_width(parts[-1]) >= length - 1:
+        return f'…{parts[-1][-(length - 1):]}'
     if parts[0].endswith(':'):
         parts[0] += os.sep
     
-    end = leng - 2
-    ret = ''
-    while end >= 0:
-        seps = parts[:end]
-        ret  = os.path.join(*seps, '...', parts[-1])
+    start = 1
+    ret   = ''
+    while start < leng:
+        seps = parts[start:]
+        ret  = os.path.join(parts[0], '…', *seps)
         if text_width(ret) <= length:
             return ret
-        end -= 1
-    return ret
+        start += 1
+    return os.path.join('…', seps[-1])
 
 def fomit_path(fstr: str, path: pathLike) -> str:
     count       = fstr.count('{}')
     placeholder = fstr.replace('{}', '')
-    length      = (SPLITER_LENGTH - text_width(placeholder)) / (count if count > 0 else count == 1)
+    if count <= 0:
+        count = 1
+    length = (SPLITER_LENGTH - text_width(placeholder)) / count
     return omit_path(path, int(length))
