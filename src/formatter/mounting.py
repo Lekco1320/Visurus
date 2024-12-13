@@ -1,21 +1,21 @@
+import util
 import watermark
 
 from util import *
-from util import config
 from util import menu
-from util import output
-from util import workspace
-
+from app import output
+from app import workspace
+from app import appconfig
 from PIL import Image
 
 targets: list[image] = []
 
-CONFIG = config.get('mounting', [
-    config.field('width',     0.1),
-    config.field('height',    0.08),
-    config.field('color',     color('#FFFFFFFF')),
-    config.field('watermark', False),
-    config.field('wstyle',    watermark.style.default(), watermark.style.self_validate)
+CONFIG = appconfig.get('mounting', [
+    util.field('width',     0.1),
+    util.field('height',    0.08),
+    util.field('color',     color('#FFFFFFFF')),
+    util.field('watermark', False),
+    util.field('wstyle',    watermark.style.default(), watermark.style.self_validate)
 ])
 
 @errhandler
@@ -28,7 +28,7 @@ def main():
     m.add(menu.option('B', '裱褙颜色', set_color,                     get_color))
     m.add(menu.option('E', '图像水印', e_main,                        e_value))
     m.add(menu.option('S', '水印样式…', CONFIG.wstyle.set,            enfunc=lambda: CONFIG.watermark))
-    m.add(menu.option('Y', '保存当前设置', lambda: config.save(CONFIG)))
+    m.add(menu.option('Y', '保存当前设置', lambda: appconfig.save(CONFIG)))
     m.add(menu.splitter('- 导入与导出 -'))
     m.add(menu.option('C', '选择目标图像…', choose_targets))
     m.add(menu.option('O', '执行导出…', execute))

@@ -1,11 +1,11 @@
 import pickle
 import readline
 
-from pathlib     import Path
-from .errhandler import errhandler
-from .appdir     import APPDIR
+from .               import appdir
+from pathlib         import Path
+from util.decorators import errhandler, nohistory
 
-HISTORY_FILE: Path              = APPDIR / 'history.bin'
+HISTORY_FILE: Path              = appdir.APPDIR / 'history.bin'
 histories: dict[str, list[str]] = {}
 
 @errhandler
@@ -53,11 +53,5 @@ def history(key: str):
             return ret
         return wrapper
     return decorator
-
-def nohistory(func):
-    def wrapper(*args, **kwargs):
-        readline.clear_history()
-        return func(*args, **kwargs)
-    return wrapper
 
 read_history()

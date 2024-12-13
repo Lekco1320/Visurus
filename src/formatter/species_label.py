@@ -1,15 +1,18 @@
+import util
 import watermark
-import resources
 
 from util import *
-from util import config
 from util import menu
 from util import lstr
-from util import output
-from util import workspace
 
-from format import shadow
-from format import round_corner
+from app import output
+from app import workspace
+from app import appconfig
+from app import resources
+from app import console
+
+from formatter import shadow
+from formatter import round_corner
 
 from PIL import Image
 from PIL import ImageFont
@@ -19,14 +22,14 @@ from datetime import datetime
 
 #region 变量
 
-CONFIG = config.get('species_label', [
-    config.field('size',      '2K'),
-    config.field('shadow',    False),
-    config.field('sstyle',    shadow.style.DEFAULT,       shadow.style.self_validate),
-    config.field('round',     False),
-    config.field('rstyle',    round_corner.style.DEFAULT, round_corner.style.self_validate),
-    config.field('watermark', False),
-    config.field('wstyle',    watermark.style.DEFAULT,    watermark.style.self_validate),
+CONFIG = appconfig.get('species_label', [
+    util.field('size',      '2K'),
+    util.field('shadow',    False),
+    util.field('sstyle',    shadow.style.DEFAULT,       shadow.style.self_validate),
+    util.field('round',     False),
+    util.field('rstyle',    round_corner.style.DEFAULT, round_corner.style.self_validate),
+    util.field('watermark', False),
+    util.field('wstyle',    watermark.style.DEFAULT,    watermark.style.self_validate),
 ])
 
 targets       = []
@@ -69,7 +72,7 @@ def main():
     m.add(menu.option('W', '水印样式…',    CONFIG.wstyle.set, enfunc=lambda: CONFIG.watermark))
     m.add(menu.option('R', '图像圆角',     r_main, r_value))
     m.add(menu.option('P', '圆角参数',     CONFIG.rstyle.set, enfunc=lambda: CONFIG.round))
-    m.add(menu.option('Y', '保存当前设置', lambda: config.save(CONFIG)))
+    m.add(menu.option('Y', '保存当前设置', lambda: appconfig.save(CONFIG)))
     m.add(menu.splitter('- 导入与导出 -'))
     m.add(menu.option('C', '选择目标图像…', choose_targets))
     m.add(menu.option('O', '执行导出…',    execute))
@@ -91,7 +94,7 @@ def choose_targets():
 
 #region 物种名
 
-@history('species_label.species_name')
+@console.history('species_label.species_name')
 def set_species_name():
     print_output('请输入物种名:')
     print_ps('用半角括号括住拼音')
@@ -105,7 +108,7 @@ def get_species_name() -> str:
 
 #region 拉丁学名
 
-@history('species_label.latin_name')
+@console.history('species_label.latin_name')
 def set_latin_name():
     print_output('请输入拉丁学名:')
     global latin_name
@@ -157,7 +160,7 @@ def get_date() -> str:
 
 #region 地点
 
-@history('species_label.location')
+@console.history('species_label.location')
 def set_location():
     print_output('请输入地点:')
     global location

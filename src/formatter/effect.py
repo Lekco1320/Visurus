@@ -1,24 +1,26 @@
+import util
 import watermark
 
 from util import *
-from util import config
 from util import menu
-from util import output
-from util import workspace
 
-from format import shadow
-from format import round_corner
+from app import output
+from app import workspace
+from app import appconfig
+
+from formatter import shadow
+from formatter import round_corner
 
 from PIL import Image
 
-CONFIG = config.get('effect', [
-    config.field('shadow',    False),
-    config.field('sstyle',    shadow.style.DEFAULT,       shadow.style.self_validate),
-    config.field('round',     False),
-    config.field('rstyle',    round_corner.style.DEFAULT, round_corner.style.self_validate),
-    config.field('order',     ('阴影', '圆角', '水印')),
-    config.field('watermark', False),
-    config.field('wstyle',    watermark.style.DEFAULT,    watermark.style.self_validate),
+CONFIG = appconfig.get('effect', [
+    util.field('shadow',    False),
+    util.field('sstyle',    shadow.style.DEFAULT,       shadow.style.self_validate),
+    util.field('round',     False),
+    util.field('rstyle',    round_corner.style.DEFAULT, round_corner.style.self_validate),
+    util.field('order',     ('阴影', '圆角', '水印')),
+    util.field('watermark', False),
+    util.field('wstyle',    watermark.style.DEFAULT,    watermark.style.self_validate),
 ])
 
 targets = []
@@ -34,7 +36,7 @@ def main():
     m.add(menu.option('W', '图像水印',  w_main,    w_value))
     m.add(menu.option('T', '水印样式…', CONFIG.wstyle.set, enfunc=lambda: CONFIG.watermark))
     m.add(menu.option('E', '效果顺序', set_order, get_order))
-    m.add(menu.option('Y', '保存当前设置', lambda: config.save(CONFIG)))
+    m.add(menu.option('Y', '保存当前设置', lambda: appconfig.save(CONFIG)))
     m.add(menu.splitter('- 导入与导出 -'))
     m.add(menu.option('C', '选择目标图像…', choose_targets))
     m.add(menu.option('O', '执行导出…',    execute))

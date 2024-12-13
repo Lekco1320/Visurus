@@ -1,10 +1,10 @@
-import resources
+from .        import appconfig
+from .        import resources
+from .console import clear_history
 
-from .        import menu
-from .        import config
-from .        import errhandler
-from .printer import *
-from .history import clear_history
+from util         import menu
+from util         import errhandler
+from util.printer import *
 
 def main():
     m = menu.menu('Lekco Visurus - 设置', 'Q')
@@ -20,7 +20,7 @@ def display():
 
 @errhandler
 def restore_config():
-    config.clear()
+    appconfig.clear()
     print_success('已恢复至默认设置，重启程序以生效.')
     exit()
 

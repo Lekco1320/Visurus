@@ -1,10 +1,11 @@
 import os
+import util
 
 from util import *
-from util import config
 from util import ansi
 from util import menu
-from util import workspace
+from app import appconfig
+from app import workspace
 
 from tkinter  import filedialog
 from datetime import datetime
@@ -19,10 +20,10 @@ FORMAT_MAP = {
     '*.GIF': 'GIF',
 }
 
-CONFIG = config.get('output', [
-    config.field('dir',      '桌面'),
-    config.field('format',   '*.JPG'),
-    config.field('filename', 'o_{N}{E}'),
+CONFIG = appconfig.get('output', [
+    util.field('dir',      '桌面'),
+    util.field('format',   '*.JPG'),
+    util.field('filename', 'o_{N}{E}'),
 ])
 
 def init(imgs: list[outimage]):
@@ -42,7 +43,7 @@ def main(imgs: list[outimage]):
     m.add(menu.option('S', '文件名格式', n_main, n_value))
     m.add(menu.splitter('导出'))
     m.add(menu.option('V', '预览图像',   preview))
-    m.add(menu.option('Y', '保存当前设置', lambda: config.save(CONFIG)))
+    m.add(menu.option('Y', '保存当前设置', lambda: appconfig.save(CONFIG)))
     m.add(menu.option('O', '确认并导出', output))
     m.add(menu.option('Q', '返回'))
     m.run()

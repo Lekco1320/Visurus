@@ -1,5 +1,5 @@
+import util
 import random
-import resources
 
 from .scaler import *
 from .anchor import *
@@ -7,16 +7,18 @@ from .mark   import *
 from .style  import style
 
 from util import *
-from util import config
 from util import menu
-from util import output
-from util import workspace
+
+from app import output
+from app import workspace
+from app import resources
+from app import appconfig
 
 from PIL import Image
 
 targets = []
-CONFIG  = config.get('watermark', [
-    config.field('style', style.DEFAULT, style.self_validate)
+CONFIG  = appconfig.get('watermark', [
+    util.field('style', style.DEFAULT, style.self_validate)
 ])
 
 #region 主函数
@@ -26,7 +28,7 @@ def main_menu():
     m.add(menu.display(display))
     m.add(menu.option('C', '选择目标图像…', choose_targets))
     m.add(menu.option('S', '水印样式…',     CONFIG.style.set))
-    m.add(menu.option('Y', '保存当前设置',  lambda: config.save(CONFIG)))
+    m.add(menu.option('Y', '保存当前设置',  lambda: appconfig.save(CONFIG)))
     m.add(menu.option('O', '执行导出…',     execute))
     m.add(menu.option('Q', '返回'))
     m.run()

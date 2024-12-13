@@ -2,24 +2,24 @@
 # Lukaß Zhang, 2024/05/23
 
 import sys
-import format
+import formatter
 import watermark
 
 from util import *
 from util import menu
-from util import about
-from util import setting
-from util import stitching
-from util import workspace
+from app import about
+from app import settings
+from app import stitcher
+from app import workspace
 
 @errhandler
 def main():
     m = menu.menu('Lekco Visurus', 'Q')
-    m.add(menu.option('F', '图像格式化…', format.main_menu))
-    m.add(menu.option('S', '图像拼接…',   stitching.main))
+    m.add(menu.option('F', '图像格式化…', formatter.main_menu))
+    m.add(menu.option('S', '图像拼接…',   stitcher.main))
     m.add(menu.option('T', '添加水印…',   watermark.main_menu))
     m.add(menu.option('W', '工作区…',     workspace.main))
-    m.add(menu.option('O', '设置…',       setting.main))
+    m.add(menu.option('O', '设置…',       settings.main))
     m.add(menu.option('A', '关于',        about.main))
     m.add(menu.option('Q', '退出'))
     m.run()

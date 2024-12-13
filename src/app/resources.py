@@ -4,7 +4,8 @@ import shutil
 
 from util import *
 from util import menu
-from util import appdir
+
+from . import appdir
 
 from enum    import Enum
 from pathlib import Path

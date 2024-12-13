@@ -1,9 +1,9 @@
 import os
-import resources
 
 from util import *
 from util import config
 from util import menu
+from app  import resources
 
 #region 变量
 

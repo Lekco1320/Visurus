@@ -1,12 +1,15 @@
+import util
 import watermark
-import resources
 
 from util import *
 from util import config
 from util import menu
 from util import ansi
-from util import output
-from util import workspace
+from app import output
+from app import workspace
+from app import appconfig
+from app import resources
+from app import console
 
 from PIL import Image
 from PIL import ImageDraw
@@ -15,23 +18,23 @@ from PIL import ImageFilter
 from PIL import ImageEnhance
 from PIL.ExifTags import Base
 
-from format import shadow
+from formatter import shadow
 
 #region 变量
 
 targets: list[image] = []
 out: list[outimage]  = []
 
-CONFIG = config.get('photo_params', [
-    config.field('size',          '2K'),
-    config.field('shadow',        False),
-    config.field('sstyle',        shadow.style.DEFAULT,    shadow.style.self_validate),
-    config.field('watermark',     False),
-    config.field('wstyle',        watermark.style.DEFAULT, watermark.style.self_validate),
-    config.field('typeset',       '底部双侧标注'),
-    config.field('bottom_side',   ['{B}', '{D}', '{L} {F} {E} {I}', '{T}']),
-    config.field('bottom_center', ['Shot on ', '{D} ', '{M} ', '{L} {F} {E} {I}']),
-    config.field('back_blur',     ['{D}', '{L} {F} {E} {I}', 50, 0.45]),
+CONFIG = appconfig.get('photo_params', [
+    util.field('size',          '2K'),
+    util.field('shadow',        False),
+    util.field('sstyle',        shadow.style.DEFAULT,    shadow.style.self_validate),
+    util.field('watermark',     False),
+    util.field('wstyle',        watermark.style.DEFAULT, watermark.style.self_validate),
+    util.field('typeset',       '底部双侧标注'),
+    util.field('bottom_side',   ['{B}', '{D}', '{L} {F} {E} {I}', '{T}']),
+    util.field('bottom_center', ['Shot on ', '{D} ', '{M} ', '{L} {F} {E} {I}']),
+    util.field('back_blur',     ['{D}', '{L} {F} {E} {I}', 50, 0.45]),
 ])
 
 width = { '1080P' : 1920, '2K' : 2560, '4K' : 3840 }
@@ -93,7 +96,7 @@ def display(image: image):
 
 #region 拍摄参数
 
-@history('photo_params.make')
+@console.history('photo_params.make')
 def set_make():
     print_output('请输入相机制造商:')
     info[Base.Make] = get_input()
@@ -101,7 +104,7 @@ def set_make():
 def get_make() -> str:
     return info[Base.Make]
 
-@history('photo_params.model')
+@console.history('photo_params.model')
 def set_model():
     print_output('请输入相机型号:')
     info[Base.Model] = get_input()
@@ -109,7 +112,7 @@ def set_model():
 def get_model() -> str:
     return info[Base.Model]
 
-@history('photo_params.lens_model')
+@console.history('photo_params.lens_model')
 def set_lens_model():
     print_output('请输入镜头型号:')
     info[Base.LensModel] = get_input()
@@ -117,7 +120,7 @@ def set_lens_model():
 def get_lens_model() -> str:
     return info[Base.LensModel]
 
-@history('photo_params.focal_length')
+@console.history('photo_params.focal_length')
 def set_focal_len():
     print_output('请输入焦距:')
     info[Base.FocalLength] = get_input()
@@ -125,7 +128,7 @@ def set_focal_len():
 def get_focal_len() -> str:
     return info[Base.FocalLength]
 
-@history('photo_params.exposure_time')
+@console.history('photo_params.exposure_time')
 def set_exposure_time():
     print_output('请输入曝光时间:')
     info[Base.ExposureTime] = get_input()
@@ -133,7 +136,7 @@ def set_exposure_time():
 def get_exposure_time() -> str:
     return info[Base.ExposureTime]
 
-@history('photo_params.fnumber')
+@console.history('photo_params.fnumber')
 def set_fnumber():
     print_output('请输入光圈值:')
     info[Base.FNumber] = get_input()
@@ -141,7 +144,7 @@ def set_fnumber():
 def get_fnumber() -> str:
     return info[Base.FNumber]
 
-@history('photo_params.iso')
+@console.history('photo_params.iso')
 def set_iso():
     print_output('请输入ISO值:')
     info[Base.ISOSpeedRatings] = get_input()

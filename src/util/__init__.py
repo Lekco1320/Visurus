@@ -1,14 +1,15 @@
-from .errhandler import errhandler
-from .wrapper    import wrapper
-from .printer    import *
-from .image      import image
-from .image      import outimage
-from .color      import color
-from .history    import history, nohistory
-from .version    import version
+from .decorators import errhandler, nohistory
+from .wrapper   import wrapper
+from .printer   import *
+from .image     import image
+from .image     import outimage
+from .color     import color
+from .version   import version
+from .config    import field
 
 __all__ = [
     "errhandler",
+    "nohistory",
     "wrapper",
     "image",
     "outimage",
@@ -37,7 +38,6 @@ __all__ = [
     "fomit_path",
     "omit_str",
     "fomit_str",
-    "history",
-    "nohistory",
     "version",
+    "field",
 ]

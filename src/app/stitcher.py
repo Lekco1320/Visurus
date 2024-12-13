@@ -1,20 +1,22 @@
+import util
+
 from util import *
-from util import config
 from util import menu
-from util import output
-from util import workspace
+from . import appconfig
+from . import output
+from . import workspace
 
 from PIL import Image
 
 targets: list[image] = []
 
-CONFIG = config.get('stitching', [
-    config.field('direction',  '垂直方向'),
-    config.field('clip',       '扩展至最长边'),
-    config.field('halign',     '左对齐'),
-    config.field('valign',     '顶部对齐'),
-    config.field('spacing',    0),
-    config.field('background', color('#FFFFFFFF')),
+CONFIG = appconfig.get('stitcher', [
+    util.field('direction',  '垂直方向'),
+    util.field('clip',       '扩展至最长边'),
+    util.field('halign',     '左对齐'),
+    util.field('valign',     '顶部对齐'),
+    util.field('spacing',    0),
+    util.field('background', color('#FFFFFFFF')),
 ])
 
 def main():
@@ -30,7 +32,7 @@ def main():
     m.add(menu.splitter('- 导入与导出 -'))
     m.add(menu.option('C', '选择目标图像…', choose_targets))
     m.add(menu.option('S', '更变图像顺序',  change_order))
-    m.add(menu.option('Y', '保存当前设置',  lambda: config.save(CONFIG)))
+    m.add(menu.option('Y', '保存当前设置',  lambda: appconfig.save(CONFIG)))
     m.add(menu.option('O', '执行导出…',     execute))
     m.add(menu.option('Q', '返回'))
     m.run()

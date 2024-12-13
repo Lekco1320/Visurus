@@ -7,6 +7,9 @@ APPDIR: Path = None
 
 def check_appdir():
     global APPDIR
+    if APPDIR != None:
+        return
+    
     system = platform.system()
     if system == "Windows":
         app_resource = Path(os.getenv("APPDATA")) / "Lekco" / "Visurus"
