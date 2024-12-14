@@ -3,7 +3,7 @@ import time
 import unicodedata
 
 from .ansi   import *
-from typing  import overload
+from typing  import *
 from pathlib import Path
 
 FULL_CHAR_WIDTH = 2
@@ -26,11 +26,11 @@ def text_width(text: str) -> int:
     ...
 
 @overload
-def text_width(text: ansi_str) -> int:
+def text_width(text: AnsiStr) -> int:
     ...
 
 @overload
-def text_width(text: ansi_stream) -> int:
+def text_width(text: AnsiStream) -> int:
     ...
 
 def text_width(text: strOrStream) -> int:
@@ -44,11 +44,11 @@ def wrap_text(text: str, width: int) -> str:
     ...
 
 @overload
-def wrap_text(text: ansi_str, width: int) -> ansi_str:
+def wrap_text(text: AnsiStr, width: int) -> AnsiStr:
     ...
 
 @overload
-def wrap_text(text: ansi_stream, width: int) -> ansi_stream:
+def wrap_text(text: AnsiStream, width: int) -> AnsiStream:
     ...
 
 def wrap_text(text: strOrStream, width: int) -> strOrStream:
@@ -57,11 +57,11 @@ def wrap_text(text: strOrStream, width: int) -> strOrStream:
     
     if isinstance(text, str):
         return _wrap_text_str(text, width)
-    if isinstance(text, ansi_str):
+    if isinstance(text, AnsiStr):
         text = text.copy()
         text.str = _wrap_text_str(text.str, width)
         return text
-    if isinstance(text, ansi_stream):
+    if isinstance(text, AnsiStream):
         return _wrap_text_ansi_stream(text, width)
 
 def _wrap_cannot_break(char: str) -> bool:
@@ -106,7 +106,7 @@ def _wrap_text_str(text: str, width: int, offset: int = 0) -> str:
     lines.append(text)
     return '\n'.join(lines)
 
-def _wrap_text_ansi_stream(stream: ansi_stream, width: int) -> ansi_stream:
+def _wrap_text_ansi_stream(stream: AnsiStream, width: int) -> AnsiStream:
     astrs  = []
     offset = 0
     for astr in stream._astrs:
@@ -120,17 +120,17 @@ def _wrap_text_ansi_stream(stream: ansi_stream, width: int) -> ansi_stream:
                 break
             offset += 1
 
-    return ansi_stream(astrs)
+    return AnsiStream(astrs)
 
 def print_wrap(text: strOrStream):
-    print(wrap_text(text, SPLITER_LENGTH))
+    print(wrap_text(text, SPLITTER_LENGTH))
 
 @overload
 def center(text: str, width: int) -> str:
     ...
 
 @overload
-def center(text: ansi_str, width: int) -> ansi_str:
+def center(text: AnsiStr, width: int) -> AnsiStr:
     ...
 
 def center(text: strLike, width: int):
@@ -140,20 +140,20 @@ def center(text: strLike, width: int):
     return '*' + ' ' * left + text + ' ' * right + '*'
 
 def print_center(text: strLike):
-    print(center(text, SPLITER_LENGTH))
+    print(center(text, SPLITTER_LENGTH))
 
-SPLITER_LENGTH = 47
+SPLITTER_LENGTH = 47
 
-def print_spliter():
-    print('*' * SPLITER_LENGTH)
+def print_splitter():
+    print('*' * SPLITTER_LENGTH)
 
 def clear_line():
-    print(f'{ansi_format.CONTROL_CODE}2K', end='')
-    print(f'{ansi_format.format.CONTROL_CODE}H',  end='')
+    print(f'{AnsiFormat.CONTROL_CODE}2K', end='')
+    print(f'{AnsiFormat.format.CONTROL_CODE}H',  end='')
 
 def clear_screen():
-    print(f'{ansi_format.CONTROL_CODE}2J',   end='')
-    print(f'{ansi_format.CONTROL_CODE}1;1H', end='')
+    print(f'{AnsiFormat.CONTROL_CODE}2J',   end='')
+    print(f'{AnsiFormat.CONTROL_CODE}1;1H', end='')
 
 def true_clear_screen(): 
     if os.name == 'posix':
@@ -166,22 +166,22 @@ def up_line():
 
 def left(text: strOrStream):
     length = text_width(text)
-    right  = SPLITER_LENGTH - 3 - length
+    right  = SPLITTER_LENGTH - 3 - length
     return '* ' + text + ' ' * right + '*'
 
 def print_left(text: strOrStream):
     print(left(text))
 
 def print_subtitle(text: strOrStream):
-    print_spliter()
-    print_center(ansi_str(text, FORMAT_TITLE))
+    print_splitter()
+    print_center(AnsiStr(text, FORMAT_TITLE))
 
 def print_title(text: strOrStream):
     print_subtitle(text)
-    print_spliter()
+    print_splitter()
 
 def kv(key: str, value: str = None):
-    fstr = ansi_str('', FORMAT_VALUE)
+    fstr = AnsiStr('', FORMAT_VALUE)
     main = f'{key}'
     if value != None:
         main += ': '
@@ -193,7 +193,7 @@ def print_kv(key: str, value: str = None):
 
 def print_option(key: strLike, text: strLike, value: str = None):
     kv_str = kv(text, value)
-    print_left(ansi_str(f'{key}', FORMAT_OPTION) + ' | ' + kv_str)
+    print_left(AnsiStr(f'{key}', FORMAT_OPTION) + ' | ' + kv_str)
 
 def get_input(text: strLike = '') -> str:
     return input(f'< {text}')
@@ -202,17 +202,17 @@ def print_output(text: strLike):
     print(f'> {text}')
 
 def print_ps(text: str):
-    print_output(ansi_str('* ' + text, FORMAT_PS))
+    print_output(AnsiStr('* ' + text, FORMAT_PS))
 
 def wait(t: float = 1.5):
     time.sleep(t)
 
 def print_error(ex: str):
-    print_output(ansi_str('[错误] ' + ex, FORMAT_ERROR))
+    print_output(AnsiStr('[错误] ' + ex, FORMAT_ERROR))
     wait()
 
 def print_success(text: str):
-    print_output(ansi_str(text, FORMAT_SUCCESS))
+    print_output(AnsiStr(text, FORMAT_SUCCESS))
     wait(1.0)
 
 def omit_str(s: str, length: int) -> str:
@@ -234,7 +234,7 @@ def fomit_str(fstr: str, s: str) -> str:
     placeholder = fstr.replace('{}', '')
     if count <= 0:
         count = 1
-    length = (SPLITER_LENGTH - text_width(placeholder)) / count
+    length = (SPLITTER_LENGTH - text_width(placeholder)) / count
     return omit_str(s, int(length))
 
 pathLike = Union[str, Path]
@@ -274,5 +274,15 @@ def fomit_path(fstr: str, path: pathLike) -> str:
     placeholder = fstr.replace('{}', '')
     if count <= 0:
         count = 1
-    length = (SPLITER_LENGTH - text_width(placeholder)) / count
+    length = (SPLITTER_LENGTH - text_width(placeholder)) / count
     return omit_path(path, int(length))
+
+__all__ = [
+    "set_full_char_width", "is_full_width_char", "char_width",
+    "text_width", "wrap_text", "print_wrap", "center", "print_center",
+    "print_splitter", "clear_line", "clear_screen", "true_clear_screen",
+    "up_line", "left", "print_left", "print_subtitle", "print_title",
+    "kv", "print_kv", "print_option", "get_input", "print_output",
+    "print_ps", "wait", "print_error", "print_success", "omit_str",
+    "fomit_str", "omit_path", "fomit_path",
+]

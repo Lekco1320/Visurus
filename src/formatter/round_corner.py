@@ -1,53 +1,51 @@
-from util import *
-from util import config
-from util import menu
+import util
 
 from PIL import Image
 from PIL import ImageDraw
 
-class style(config.config):
+class Style(util.Config):
     FIELDS = [
-        config.field('radius', 10),
+        util.Field('radius', 10),
     ]
     
     DEFAULT = None
 
     @classmethod
-    def default(cls) -> 'style':
-        ret = style()
-        ret.validate(style.FIELDS)
+    def default(cls) -> 'Style':
+        ret = Style()
+        ret.validate(Style.FIELDS)
         return ret
     
     def __init__(self) -> None:
         super().__init__('')
-        self.validate(style.FIELDS)
+        self.validate(Style.FIELDS)
     
     def self_validate(self) -> bool:
-        return super().validate(style.FIELDS)
+        return super().validate(Style.FIELDS)
     
     def set(self):
         style_main(self)
 
-style.DEFAULT = style.default()
+Style.DEFAULT = Style.default()
 
-def style_main(style: style):
-    m = menu.menu('Lekco Visurus - 圆角效果', 'Q')
-    m.add(menu.option('R', '圆角半径', lambda: set_radius(style), lambda: get_radius(style)))
-    m.add(menu.option('Q', '返回'))
+def style_main(style: Style):
+    m = util.Menu('Lekco Visurus - 圆角效果', 'Q')
+    m.add(util.Option('R', '圆角半径', lambda: set_radius(style), lambda: get_radius(style)))
+    m.add(util.Option('Q', '返回'))
 
-@errhandler
-def set_radius(style: style):
-    print_output('请输入圆角半径:')
-    value = int(get_input())
+@util.errhandler
+def set_radius(style: Style):
+    util.print_output('请输入圆角半径:')
+    value = int(util.get_input())
     if value < 0:
         raise ValueError(f'非法的圆角半径值 {value}')
     style.radius = value
 
-def get_radius(style: style) -> str:
+def get_radius(style: Style) -> str:
     return f'{style.radius}px'
 
 # https://www.pyget.cn/p/185266
-def process(style: style, image: Image.Image) -> Image.Image: 
+def process(style: Style, image: Image.Image) -> Image.Image: 
     radii = style.radius
     circle = Image.new('L', (radii * 2, radii * 2), 0)
     draw = ImageDraw.Draw(circle)

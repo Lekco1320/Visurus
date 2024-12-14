@@ -15,3 +15,5 @@ def nohistory(func):
         readline.clear_history()
         return func(*args, **kwargs)
     return wrapper
+
+__all__ = ["errhandler", "nohistory"]

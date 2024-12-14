@@ -1,6 +1,6 @@
 from typing import Any
 
-class lstr:
+class AnnotatedStr:
     def __init__(self, text: str = '') -> None:
         self._textlist = []
         self._raw      = text
@@ -34,7 +34,7 @@ class lstr:
     def __len__(self) -> int:
         return len(self._textlist)
     
-    def __iter__(self) -> 'lstr':
+    def __iter__(self) -> 'AnnotatedStr':
         self._id = 0
         return self
     
@@ -46,3 +46,5 @@ class lstr:
     
     def __str__(self) -> str:
         return self._raw
+
+__all__ = ["AnnotatedStr"]

@@ -1,14 +1,13 @@
 import os
 
-from util import *
-from util import ansi
+from .ansi    import *
+from .printer import *
 
 from PIL          import Image
 from PIL.ExifTags import Base
+from datetime     import datetime
 
-from datetime import datetime
-
-class image:
+class InImage:
     def __init__(self, path: str) -> None:
         self._path = path
         self._dir  = os.path.dirname(path)
@@ -51,14 +50,14 @@ class image:
         with Image.open(self._path) as raw:
             data = raw._getexif()
         return {
-            Base.Make             : image._exif_format(data, Base.Make, lambda val: val, 'Unknown'),
-            Base.Model            : image._exif_format(data, Base.Model, lambda val: val, 'Unknown'),
-            Base.LensModel        : image._exif_format(data, Base.LensModel, lambda val: val, 'Unknown'),
-            Base.FocalLength      : image._exif_format(data, Base.FocalLength, lambda val: f'{image._to_int(val)}mm', '-mm'),
-            Base.ExposureTime     : image._exif_format(data, Base.ExposureTime, lambda val: f'{val if val >= 1 else val.real.__str__()}s', '1/-s'),
-            Base.FNumber          : image._exif_format(data, Base.FNumber, lambda val: f'f/{image._to_int(val)}', 'f/-'),
-            Base.ISOSpeedRatings  : image._exif_format(data, Base.ISOSpeedRatings, lambda val: f'ISO{val}', 'ISO-'),
-            Base.DateTimeOriginal : image._exif_format(data, Base.DateTimeOriginal, lambda val: datetime.strptime(val, "%Y:%m:%d %H:%M:%S").__str__(), '-/-/- -:-:-'),
+            Base.Make             : InImage._exif_format(data, Base.Make, lambda val: val, 'Unknown'),
+            Base.Model            : InImage._exif_format(data, Base.Model, lambda val: val, 'Unknown'),
+            Base.LensModel        : InImage._exif_format(data, Base.LensModel, lambda val: val, 'Unknown'),
+            Base.FocalLength      : InImage._exif_format(data, Base.FocalLength, lambda val: f'{InImage._to_int(val)}mm', '-mm'),
+            Base.ExposureTime     : InImage._exif_format(data, Base.ExposureTime, lambda val: f'{val if val >= 1 else val.real.__str__()}s', '1/-s'),
+            Base.FNumber          : InImage._exif_format(data, Base.FNumber, lambda val: f'f/{InImage._to_int(val)}', 'f/-'),
+            Base.ISOSpeedRatings  : InImage._exif_format(data, Base.ISOSpeedRatings, lambda val: f'ISO{val}', 'ISO-'),
+            Base.DateTimeOriginal : InImage._exif_format(data, Base.DateTimeOriginal, lambda val: datetime.strptime(val, "%Y:%m:%d %H:%M:%S").__str__(), '-/-/- -:-:-'),
         }
     
     @staticmethod
@@ -74,18 +73,18 @@ class image:
         value = data.get(key, None)
         return formatfunc(value) if value != None else default
     
-    def formated_name(self) -> ansi.ansi_stream:
+    def formated_name(self) -> AnsiStream:
         return fomit_path('* xx. {} @0000x0000 *', self._path) + \
-               ansi.ansi_str(f' @{self._width}x{self._height}', ansi.FORMAT_ANNO)
+               AnsiStr(f' @{self._width}x{self._height}', FORMAT_ANNO)
 
-class outimage:
-    def __init__(self, new: Image.Image, src: image = None):
+class OutImage:
+    def __init__(self, new: Image.Image, src: InImage = None):
         self._img    = new
         self._width  = new.width
         self._height = new.height
         self._dir    = None
         self._name   = None
-        if isinstance(src, image):
+        if isinstance(src, InImage):
             self._dir  = src._dir
             self._name = src._name
     
@@ -104,6 +103,8 @@ class outimage:
     def convert(self, mode: str) -> None:
         self._img = self._img.convert(mode)
     
-    def formated_name(self) -> ansi.ansi_stream:
+    def formated_name(self) -> AnsiStream:
         return fomit_str('* xx. {} @0000x0000 *', self._name) + \
-               ansi.ansi_str(f' @{self._width}x{self._height}', ansi.FORMAT_ANNO)
+               AnsiStr(f' @{self._width}x{self._height}', FORMAT_ANNO)
+
+__all__ = ["InImage", "OutImage"]

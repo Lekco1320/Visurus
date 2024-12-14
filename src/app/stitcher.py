@@ -1,63 +1,61 @@
 import util
 
-from util import *
-from util import menu
 from . import appconfig
 from . import output
 from . import workspace
 
 from PIL import Image
 
-targets: list[image] = []
+targets: list[util.InImage] = []
 
 CONFIG = appconfig.get('stitcher', [
-    util.field('direction',  '垂直方向'),
-    util.field('clip',       '扩展至最长边'),
-    util.field('halign',     '左对齐'),
-    util.field('valign',     '顶部对齐'),
-    util.field('spacing',    0),
-    util.field('background', color('#FFFFFFFF')),
+    util.Field('direction',  '垂直方向'),
+    util.Field('clip',       '扩展至最长边'),
+    util.Field('halign',     '左对齐'),
+    util.Field('valign',     '顶部对齐'),
+    util.Field('spacing',    0),
+    util.Field('background', util.Color('#FFFFFFFF')),
 ])
 
 def main():
-    m = menu.menu('Lekco Visurus - 图像拼接', 'Q')
-    m.add(menu.display(display))
-    m.add(menu.splitter('- 拼接选项 -'))
-    m.add(menu.option('D', '拼接方向', d_main,         d_value))
-    m.add(menu.option('L', '裁切模式', l_main,         l_value))
-    m.add(menu.option('A', '对齐模式', ah_main,        a_value, enfunc=lambda: CONFIG.direction == '垂直方向'))
-    m.add(menu.option('A', '对齐模式', av_main,        a_value, enfunc=lambda: CONFIG.direction == '水平方向'))
-    m.add(menu.option('P', '图像间距', set_spacing,    get_spacing))
-    m.add(menu.option('B', '背景颜色', set_background, get_background))
-    m.add(menu.splitter('- 导入与导出 -'))
-    m.add(menu.option('C', '选择目标图像…', choose_targets))
-    m.add(menu.option('S', '更变图像顺序',  change_order))
-    m.add(menu.option('Y', '保存当前设置',  lambda: appconfig.save(CONFIG)))
-    m.add(menu.option('O', '执行导出…',     execute))
-    m.add(menu.option('Q', '返回'))
+    m = util.Menu('Lekco Visurus - 图像拼接', 'Q')
+    m.add(util.Display(display))
+    m.add(util.Splitter('- 拼接选项 -'))
+    m.add(util.Option('D', '拼接方向', d_main,         d_value))
+    m.add(util.Option('L', '裁切模式', l_main,         l_value))
+    m.add(util.Option('A', '对齐模式', ah_main,        a_value, enfunc=lambda: CONFIG.direction == '垂直方向'))
+    m.add(util.Option('A', '对齐模式', av_main,        a_value, enfunc=lambda: CONFIG.direction == '水平方向'))
+    m.add(util.Option('P', '图像间距', set_spacing,    get_spacing))
+    m.add(util.Option('B', '背景颜色', set_background, get_background))
+    m.add(util.Splitter('- 导入与导出 -'))
+    m.add(util.Option('C', '选择目标图像…', choose_targets))
+    m.add(util.Option('S', '更变图像顺序',  change_order))
+    m.add(util.Option('Y', '保存当前设置',  lambda: appconfig.save(CONFIG)))
+    m.add(util.Option('O', '执行导出…',     execute))
+    m.add(util.Option('Q', '返回'))
     m.run()
 
 def display():
     if len(targets) > 0:
-        print_left('目标图像顺序:')
+        util.print_left('目标图像顺序:')
         for i in range(len(targets)):
-            print_left(f'{i + 1}. ' + targets[i].formated_name())
+            util.print_left(f'{i + 1}. ' + targets[i].formated_name())
     else:
-        print_left('目标图像为空.')
-    print_spliter()
+        util.print_left('目标图像为空.')
+    util.print_splitter()
 
 # 选择图片对象
 def choose_targets():
     global targets
     targets = workspace.c_main()
 
-@errhandler
+@util.errhandler
 def change_order():
     if len(targets) == 0:
         raise ValueError('目标图像为空.')
-    print_output('请输入图像顺序: ')
-    print_ps('请使用 , 分隔序号.')
-    ans = list(map(int, get_input().split(',')))
+    util.print_output('请输入图像顺序: ')
+    util.print_ps('请使用 , 分隔序号.')
+    ans = list(map(int, util.get_input().split(',')))
     if len(ans) != len(targets):
         raise ValueError('图像数量不匹配.')
     for id in range(1, len(targets) + 1):
@@ -71,10 +69,10 @@ def change_order():
 #region 拼接方向
 
 def d_main():
-    m = menu.menu('Lekco Visurus - 拼接方向')
-    m.add(menu.option('H', '水平方向', d_horizion))
-    m.add(menu.option('V', '垂直方向', d_vertical))
-    m.add(menu.option('Q', '返回'))
+    m = util.Menu('Lekco Visurus - 拼接方向')
+    m.add(util.Option('H', '水平方向', d_horizion))
+    m.add(util.Option('V', '垂直方向', d_vertical))
+    m.add(util.Option('Q', '返回'))
     m.run()
 
 def d_horizion():
@@ -91,11 +89,11 @@ def d_value() -> str:
 #region 裁切模式
 
 def l_main():
-    m = menu.menu('Lekco Visurus - 裁切模式')
-    m.add(menu.option('L', '扩展至最长边', l_longest))
-    m.add(menu.option('S', '裁切至最短边', l_shortest))
-    m.add(menu.option('C', '自定义',      l_custom))
-    m.add(menu.option('Q', '返回'))
+    m = util.Menu('Lekco Visurus - 裁切模式')
+    m.add(util.Option('L', '扩展至最长边', l_longest))
+    m.add(util.Option('S', '裁切至最短边', l_shortest))
+    m.add(util.Option('C', '自定义',      l_custom))
+    m.add(util.Option('Q', '返回'))
     m.run()
 
 def l_longest():
@@ -104,10 +102,10 @@ def l_longest():
 def l_shortest():
     CONFIG.clip = '裁切至最短边'
 
-@errhandler
+@util.errhandler
 def l_custom():
-    print_output('请输入裁切宽/高:')
-    l = int(get_input())
+    util.print_output('请输入裁切宽/高:')
+    l = int(util.get_input())
     if l <= 0:
         raise ValueError(f'非法宽/高值 \'{l}\'.')
     CONFIG.clip = l
@@ -122,11 +120,11 @@ def l_value() -> str:
 #region 对齐模式
 
 def ah_main():
-    m = menu.menu('Lekco Visurus - 对齐模式')
-    m.add(menu.option('L', '左对齐',   ah_left))
-    m.add(menu.option('C', '居中对齐', ah_center))
-    m.add(menu.option('R', '右对齐',   ah_right))
-    m.add(menu.option('Q', '返回'))
+    m = util.Menu('Lekco Visurus - 对齐模式')
+    m.add(util.Option('L', '左对齐',   ah_left))
+    m.add(util.Option('C', '居中对齐', ah_center))
+    m.add(util.Option('R', '右对齐',   ah_right))
+    m.add(util.Option('Q', '返回'))
     m.run()
 
 def ah_left():
@@ -139,11 +137,11 @@ def ah_right():
     CONFIG.halign = '右对齐'
 
 def av_main():
-    m = menu.menu('Lekco Visurus - 对齐模式')
-    m.add(menu.option('T', '顶部对齐', av_top))
-    m.add(menu.option('C', '居中对齐', av_center))
-    m.add(menu.option('B', '底部对齐', av_bottom))
-    m.add(menu.option('Q', '返回'))
+    m = util.Menu('Lekco Visurus - 对齐模式')
+    m.add(util.Option('T', '顶部对齐', av_top))
+    m.add(util.Option('C', '居中对齐', av_center))
+    m.add(util.Option('B', '底部对齐', av_bottom))
+    m.add(util.Option('Q', '返回'))
     m.run()
 
 def av_top():
@@ -162,10 +160,10 @@ def a_value() -> str:
 
 #region 图像间距
 
-@errhandler
+@util.errhandler
 def set_spacing():
-    print_output('请输入图像间距:')
-    ans = int(get_input())
+    util.print_output('请输入图像间距:')
+    ans = int(util.get_input())
     if ans < 0:
         raise ValueError(f'非法的图像间距 \'{ans}\'.')
     CONFIG.spacing = ans
@@ -178,7 +176,7 @@ def get_spacing() -> str:
 #region 背景颜色
 
 def set_background():
-    CONFIG.background = color.input()
+    CONFIG.background = util.Color.input()
 
 def get_background() -> str:
     return CONFIG.background.hex
@@ -235,7 +233,7 @@ def v_process(imgs: list[Image.Image]) -> Image.Image:
         y += img.height + CONFIG.spacing
     return back
 
-@errhandler
+@util.errhandler
 def execute():
     if len(targets) <= 0:
         raise ValueError('目标图像为空.')
@@ -247,7 +245,7 @@ def execute():
     else:
         out = v_process(imgs)
     
-    out = output.outimage(out, targets[0])
+    out = output.OutImage(out, targets[0])
     output.main([out])
 
 #endregion

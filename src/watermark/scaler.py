@@ -3,7 +3,7 @@ from abc import abstractmethod
 
 from enum import Enum
 
-class scaler(ABC):
+class Scaler(ABC):
     def __init__(self) -> None:
         super().__init__()
     
@@ -22,7 +22,7 @@ class scaler(ABC):
     def size(self):
         pass
 
-class fixed_scaler(scaler):
+class FixedScaler(Scaler):
     def __init__(self, width: int | str, height: int | str) -> None:
         super().__init__()
         
@@ -41,12 +41,12 @@ class fixed_scaler(scaler):
     def size(self):
         return (self._width, self._height)
 
-class scale_ref(Enum):
+class ScaleRef(Enum):
     WIDTH  = 0
     HEIGHT = 1
 
-class proportion_scaler(scaler):
-    def __init__(self, scale_ref: scale_ref, proportion: float, ref: tuple[int, int]) -> None:
+class ProportionScaler(Scaler):
+    def __init__(self, scale_ref: ScaleRef, proportion: float, ref: tuple[int, int]) -> None:
         super().__init__()
         
         if proportion <= 0:
@@ -64,9 +64,9 @@ class proportion_scaler(scaler):
     
     def _calculate(self) -> tuple[int, int]:
         self._check()
-        if self._scale_ref == scale_ref.WIDTH:
+        if self._scale_ref == ScaleRef.WIDTH:
             return (int(self._ref[0] * self._proportion), None)
-        if self._scale_ref == scale_ref.HEIGHT:
+        if self._scale_ref == ScaleRef.HEIGHT:
             return (None, int(self._ref[1] * self._proportion))
     
     @property

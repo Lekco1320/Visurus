@@ -1,6 +1,6 @@
-class wrapper:
+class Wrapper:
     def __init__(self, data: object = None) -> None:
-        if isinstance(data, wrapper):
+        if isinstance(data, Wrapper):
             self._data = data.data
         else:
             self._data = data
@@ -11,7 +11,7 @@ class wrapper:
     
     @data.setter
     def data(self, value):
-        if isinstance(value, wrapper):
+        if isinstance(value, Wrapper):
             self._data = value.data
         else:
             self._data = value
@@ -29,7 +29,7 @@ class wrapper:
         return str(self._data)
     
     def __eq__(self, other):
-        if isinstance(other, wrapper):
+        if isinstance(other, Wrapper):
             return self._data == other._data
         return self._data == other
     
@@ -37,3 +37,5 @@ class wrapper:
         if hasattr(self._data, name):
             return getattr(self._data, name)
         raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+
+__all__ = ["Wrapper"]

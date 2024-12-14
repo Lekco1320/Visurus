@@ -1,31 +1,28 @@
-from .        import appconfig
-from .        import resources
-from .console import clear_history
+import util
 
-from util         import menu
-from util         import errhandler
-from util.printer import *
+from . import appconfig
+from . import resources
+from . import console
 
 def main():
-    m = menu.menu('Lekco Visurus - 设置', 'Q')
-    m.add(menu.display(display))
-    m.add(menu.option('R', '恢复默认设置', restore_config))
-    m.add(menu.option('C', '清除输入记录', clear_input_history))
-    m.add(menu.option('Q', '返回'))
+    m = util.Menu('Lekco Visurus - 设置', 'Q')
+    m.add(util.Display(display))
+    m.add(util.Option('R', '恢复默认设置', restore_config))
+    m.add(util.Option('C', '清除输入记录', clear_input_history))
+    m.add(util.Option('Q', '返回'))
     m.run()
 
 def display():
-    print_kv('资源路径', fomit_path('* 资源目录: {} *', str(resources.RESOURCE_FOLDER)))
-    print_spliter()
+    util.print_kv('资源路径', util.fomit_path('* 资源目录: {} *', str(resources.RESOURCE_FOLDER)))
+    util.print_splitter()
 
-@errhandler
+@util.errhandler
 def restore_config():
     appconfig.clear()
-    print_success('已恢复至默认设置，重启程序以生效.')
+    util.print_success('已恢复至默认设置，重启程序以生效.')
     exit()
 
-@errhandler
+@util.errhandler
 def clear_input_history():
-    clear_history()
-    print_success('输入记录已清除完毕.')
-    wait()
+    console.clear_history()
+    util.print_success('输入记录已清除完毕.')

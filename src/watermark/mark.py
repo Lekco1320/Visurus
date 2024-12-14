@@ -4,11 +4,11 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 
-from .anchor import anchor
-from .scaler import scaler
+from .anchor import Anchor
+from .scaler import Scaler
 
-class markbase(ABC):
-    def __init__(self, anchor: anchor, scaler: scaler) -> None:
+class MarkBase(ABC):
+    def __init__(self, anchor: Anchor, scaler: Scaler) -> None:
         super().__init__()
         
         self._anchor = anchor
@@ -31,8 +31,8 @@ class markbase(ABC):
     def mark(self, image: Image.Image) -> Image.Image:
         pass
 
-class image_mark(markbase):
-    def __init__(self, anchor: anchor, scaler: scaler, image: str, opacity: float) -> None:
+class ImageMark(MarkBase):
+    def __init__(self, anchor: Anchor, scaler: Scaler, image: str, opacity: float) -> None:
         super().__init__(anchor, scaler)
         
         self._image   = image
@@ -77,10 +77,10 @@ class image_mark(markbase):
             image.paste(aimg, position, aimg)
             return image
 
-class label_mark(markbase):
-    def __init__(self, anchor: anchor, scaler: scaler, font: str, color: tuple, text: str) -> None:
+class LabelMark(MarkBase):
+    def __init__(self, anchor: Anchor, scaler: Scaler, font: str, color: tuple, text: str) -> None:
         super().__init__(anchor, scaler)
-        
+
         self._font      = font
         self._color     = color
         self._text      = text

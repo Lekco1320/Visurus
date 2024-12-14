@@ -1,9 +1,7 @@
+import util
 import os
 import sys
 import shutil
-
-from util import *
-from util import menu
 
 from . import appdir
 
@@ -83,28 +81,28 @@ def get(key: font | icon | Path) -> str:
     raise ValueError(f'Unsupported resource type \'{type(key)}\'')
 
 def font_main(origin: font | Path) -> font | Path:
-    ret = wrapper(origin)
-    m = menu.menu('Lekco Visurus - 字体设置')
-    m.add(menu.option('I', '选择内置字体…', lambda: select_internal_font(ret)))
-    m.add(menu.option('D', '选择字体文件…', lambda: select_font(ret)))
+    ret = util.Wrapper(origin)
+    m = util.Menu('Lekco Visurus - 字体设置')
+    m.add(util.Option('I', '选择内置字体…', lambda: select_internal_font(ret)))
+    m.add(util.Option('D', '选择字体文件…', lambda: select_font(ret)))
     m.run()
     return ret.data
 
-def select_internal_font(value: wrapper):
-    m = menu.menu('Lekco Visurus - 选择字体')
-    m.add(menu.option('A', '阿里巴巴普惠体-Light',         lambda: value.set(font.PUHUI_LIGHT)))
-    m.add(menu.option('B', '阿里巴巴普惠体-Regular',       lambda: value.set(font.PUHUI_REGULAR)))
-    m.add(menu.option('C', '阿里巴巴普惠体-Bold',          lambda: value.set(font.PUHUI_BOLD)))
-    m.add(menu.option('D', '思源宋体-Bold',               lambda: value.set(font.SONGTI_BOLD)))
-    m.add(menu.option('E', 'Times New Roman',             lambda: value.set(font.TIMES_REGULAR)))
-    m.add(menu.option('F', 'Times New Roman-Bold',        lambda: value.set(font.TIMES_BOLD)))
-    m.add(menu.option('G', 'Times New Roman-Italic',      lambda: value.set(font.TIMES_ITALIC)))
-    m.add(menu.option('H', 'Times New Roman-Bold Italic', lambda: value.set(font.TIMES_BITALIC)))
+def select_internal_font(value: util.Wrapper):
+    m = util.Menu('Lekco Visurus - 选择字体')
+    m.add(util.Option('A', '阿里巴巴普惠体-Light',         lambda: value.set(font.PUHUI_LIGHT)))
+    m.add(util.Option('B', '阿里巴巴普惠体-Regular',       lambda: value.set(font.PUHUI_REGULAR)))
+    m.add(util.Option('C', '阿里巴巴普惠体-Bold',          lambda: value.set(font.PUHUI_BOLD)))
+    m.add(util.Option('D', '思源宋体-Bold',               lambda: value.set(font.SONGTI_BOLD)))
+    m.add(util.Option('E', 'Times New Roman',             lambda: value.set(font.TIMES_REGULAR)))
+    m.add(util.Option('F', 'Times New Roman-Bold',        lambda: value.set(font.TIMES_BOLD)))
+    m.add(util.Option('G', 'Times New Roman-Italic',      lambda: value.set(font.TIMES_ITALIC)))
+    m.add(util.Option('H', 'Times New Roman-Bold Italic', lambda: value.set(font.TIMES_BITALIC)))
     m.run()
 
-@errhandler
-def select_font(value: wrapper):
-    print_output('已启动文件选择器.')
+@util.errhandler
+def select_font(value: util.Wrapper):
+    util.print_output('已启动文件选择器.')
     from tkinter import filedialog
     fonttypes = [('字体文件', '*.otf;*.ttf')]
     fontfile  = filedialog.askopenfilename(title='选择字体', initialdir='/', filetypes=fonttypes)

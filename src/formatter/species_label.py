@@ -1,10 +1,6 @@
 import util
 import watermark
 
-from util import *
-from util import menu
-from util import lstr
-
 from app import output
 from app import workspace
 from app import appconfig
@@ -23,17 +19,17 @@ from datetime import datetime
 #region 变量
 
 CONFIG = appconfig.get('species_label', [
-    util.field('size',      '2K'),
-    util.field('shadow',    False),
-    util.field('sstyle',    shadow.style.DEFAULT,       shadow.style.self_validate),
-    util.field('round',     False),
-    util.field('rstyle',    round_corner.style.DEFAULT, round_corner.style.self_validate),
-    util.field('watermark', False),
-    util.field('wstyle',    watermark.style.DEFAULT,    watermark.style.self_validate),
+    util.Field('size',      '2K'),
+    util.Field('shadow',    False),
+    util.Field('sstyle',    shadow.Style.DEFAULT,       shadow.Style.self_validate),
+    util.Field('round',     False),
+    util.Field('rstyle',    round_corner.Style.DEFAULT, round_corner.Style.self_validate),
+    util.Field('watermark', False),
+    util.Field('wstyle',    watermark.Style.DEFAULT,    watermark.Style.self_validate),
 ])
 
 targets       = []
-species_name  = lstr.lstr()
+species_name  = util.AnnotatedStr()
 latin_name    = ''
 gender        = '未知'
 location      = ''
@@ -43,7 +39,7 @@ width         = { '1080P' : 1920, '2K' : 2560, '4K' : 3840 }
 def default():
     global targets, species_name, latin_name, gender, location, date
     targets       = []
-    species_name  = lstr.lstr()
+    species_name  = util.AnnotatedStr()
     latin_name    = ''
     gender        = '未知'
     location      = ''
@@ -56,34 +52,34 @@ def default():
 def main():
     default()
     
-    m = menu.menu('Lekco Visurus - 物种标注', 'Q')
-    m.add(menu.display(display))
-    m.add(menu.splitter('- 标注参数 -'))
-    m.add(menu.option('N', '物种名',       set_species_name, get_species_name))
-    m.add(menu.option('L', '拉丁学名',     set_latin_name,   get_latin_name))
-    m.add(menu.option('G', '性别',         g_main,           g_value))
-    m.add(menu.option('D', '日期',         set_date,         get_date))
-    m.add(menu.option('T', '地点',         set_location,     get_location))
-    m.add(menu.splitter('- 样式设置 -'))
-    m.add(menu.option('S', '图像尺寸',     s_main, s_value))
-    m.add(menu.option('E', '图像阴影',     e_main, e_value))
-    m.add(menu.option('H', '阴影效果…',    CONFIG.sstyle.set, enfunc=lambda: CONFIG.shadow))
-    m.add(menu.option('A', '图像水印',     a_main, a_value))
-    m.add(menu.option('W', '水印样式…',    CONFIG.wstyle.set, enfunc=lambda: CONFIG.watermark))
-    m.add(menu.option('R', '图像圆角',     r_main, r_value))
-    m.add(menu.option('P', '圆角参数',     CONFIG.rstyle.set, enfunc=lambda: CONFIG.round))
-    m.add(menu.option('Y', '保存当前设置', lambda: appconfig.save(CONFIG)))
-    m.add(menu.splitter('- 导入与导出 -'))
-    m.add(menu.option('C', '选择目标图像…', choose_targets))
-    m.add(menu.option('O', '执行导出…',    execute))
-    m.add(menu.option('Q', '返回'))
+    m = util.Menu('Lekco Visurus - 物种标注', 'Q')
+    m.add(util.Display(display))
+    m.add(util.Splitter('- 标注参数 -'))
+    m.add(util.Option('N', '物种名',       set_species_name, get_species_name))
+    m.add(util.Option('L', '拉丁学名',     set_latin_name,   get_latin_name))
+    m.add(util.Option('G', '性别',         g_main,           g_value))
+    m.add(util.Option('D', '日期',         set_date,         get_date))
+    m.add(util.Option('T', '地点',         set_location,     get_location))
+    m.add(util.Splitter('- 样式设置 -'))
+    m.add(util.Option('S', '图像尺寸',     s_main, s_value))
+    m.add(util.Option('E', '图像阴影',     e_main, e_value))
+    m.add(util.Option('H', '阴影效果…',    CONFIG.sstyle.set, enfunc=lambda: CONFIG.shadow))
+    m.add(util.Option('A', '图像水印',     a_main, a_value))
+    m.add(util.Option('W', '水印样式…',    CONFIG.wstyle.set, enfunc=lambda: CONFIG.watermark))
+    m.add(util.Option('R', '图像圆角',     r_main, r_value))
+    m.add(util.Option('P', '圆角参数',     CONFIG.rstyle.set, enfunc=lambda: CONFIG.round))
+    m.add(util.Option('Y', '保存当前设置', lambda: appconfig.save(CONFIG)))
+    m.add(util.Splitter('- 导入与导出 -'))
+    m.add(util.Option('C', '选择目标图像…', choose_targets))
+    m.add(util.Option('O', '执行导出…',    execute))
+    m.add(util.Option('Q', '返回'))
     m.run()
 
 def display():
-    print_left(f'已选择 {len(targets)} 张目标图像:')
+    util.print_left(f'已选择 {len(targets)} 张目标图像:')
     for i in range(len(targets)):
-        print_left(f'{i + 1}. ' + targets[i].formated_name())
-    print_spliter()
+        util.print_left(f'{i + 1}. ' + targets[i].formated_name())
+    util.print_splitter()
 
 #endregion
 
@@ -96,10 +92,10 @@ def choose_targets():
 
 @console.history('species_label.species_name')
 def set_species_name():
-    print_output('请输入物种名:')
-    print_ps('用半角括号括住拼音')
+    util.print_output('请输入物种名:')
+    util.print_ps('用半角括号括住拼音')
     global species_name
-    species_name = lstr.lstr(get_input())
+    species_name = util.AnnotatedStr(util.get_input())
 
 def get_species_name() -> str:
     return species_name.__str__()
@@ -110,9 +106,9 @@ def get_species_name() -> str:
 
 @console.history('species_label.latin_name')
 def set_latin_name():
-    print_output('请输入拉丁学名:')
+    util.print_output('请输入拉丁学名:')
     global latin_name
-    latin_name = get_input()
+    latin_name = util.get_input()
 
 def get_latin_name():
     return latin_name
@@ -122,11 +118,11 @@ def get_latin_name():
 #region 性别
 
 def g_main():
-    m = menu.menu('Lekco Visurus - 性别')
-    m.add(menu.option('M', '雄性', g_male))
-    m.add(menu.option('F', '雌性', g_female))
-    m.add(menu.option('N', '未知', g_unknown))
-    m.add(menu.option('Q', '退出'))
+    m = util.Menu('Lekco Visurus - 性别')
+    m.add(util.Option('M', '雄性', g_male))
+    m.add(util.Option('F', '雌性', g_female))
+    m.add(util.Option('N', '未知', g_unknown))
+    m.add(util.Option('Q', '退出'))
     m.run()
 
 def g_male():
@@ -149,9 +145,9 @@ def g_value() -> str:
 #region 日期
 
 def set_date():
-    print_output('请输入日期:')
+    util.print_output('请输入日期:')
     global date
-    date = get_input()
+    date = util.get_input()
 
 def get_date() -> str:
     return date
@@ -162,9 +158,9 @@ def get_date() -> str:
 
 @console.history('species_label.location')
 def set_location():
-    print_output('请输入地点:')
+    util.print_output('请输入地点:')
     global location
-    location = get_input()
+    location = util.get_input()
 
 def get_location() -> str:
     return location
@@ -174,12 +170,12 @@ def get_location() -> str:
 #region 图像尺寸
 
 def s_main():
-    m = menu.menu('Lekco Visurus - 图像尺寸')
-    m.add(menu.option('1', '1080P', s_1080P))
-    m.add(menu.option('2', '2K',    s_2K))
-    m.add(menu.option('3', '4K',    s_4K))
-    m.add(menu.option('4', '自适应', s_fit))
-    m.add(menu.option('Q', '退出'))
+    m = util.Menu('Lekco Visurus - 图像尺寸')
+    m.add(util.Option('1', '1080P', s_1080P))
+    m.add(util.Option('2', '2K',    s_2K))
+    m.add(util.Option('3', '4K',    s_4K))
+    m.add(util.Option('4', '自适应', s_fit))
+    m.add(util.Option('Q', '退出'))
     m.run()
 
 def s_1080P():
@@ -202,9 +198,9 @@ def s_value() -> str:
 #region 图像阴影
 
 def e_main():
-    m = menu.menu('Lekco Visurus - 图像阴影')
-    m.add(menu.option('E', '启用', e_enable))
-    m.add(menu.option('D', '关闭', e_disable))
+    m = util.Menu('Lekco Visurus - 图像阴影')
+    m.add(util.Option('E', '启用', e_enable))
+    m.add(util.Option('D', '关闭', e_disable))
     m.run()
 
 def e_enable():
@@ -221,9 +217,9 @@ def e_value() -> str:
 #region 图像圆角
 
 def r_main():
-    m = menu.menu('Lekco Visurus - 图像圆角')
-    m.add(menu.option('E', '启用', r_enable))
-    m.add(menu.option('D', '关闭', r_disable))
+    m = util.Menu('Lekco Visurus - 图像圆角')
+    m.add(util.Option('E', '启用', r_enable))
+    m.add(util.Option('D', '关闭', r_disable))
     m.run()
 
 def r_enable():
@@ -240,9 +236,9 @@ def r_value() -> str:
 #region 图像水印
 
 def a_main():
-    m = menu.menu('Lekco Visurus - 图像水印')
-    m.add(menu.option('E', '启用', a_enable))
-    m.add(menu.option('D', '关闭', a_disable))
+    m = util.Menu('Lekco Visurus - 图像水印')
+    m.add(util.Option('E', '启用', a_enable))
+    m.add(util.Option('D', '关闭', a_disable))
     m.run()
 
 def a_enable():
@@ -305,16 +301,16 @@ def get_params_h(width: int) -> dict[str, int]:
     
     return ret
 
-@errhandler
+@util.errhandler
 def execute():
     if len(targets) <= 0:
         raise ValueError('目标图像为空.')
     
     out = []
     for srcimg in targets:
-        print_output(f'正在处理 {srcimg.name}...')
+        util.print_output(f'正在处理 {srcimg.name}...')
         processed = process(srcimg.image)
-        out.append(output.outimage(processed, srcimg))
+        out.append(output.OutImage(processed, srcimg))
     
     if len(out) > 0:
         output.main(out)
@@ -322,7 +318,7 @@ def execute():
 def center_of(target_w: float, border_w: float) -> float:
     return (border_w - target_w) / 2
 
-@errhandler
+@util.errhandler
 def process(img: Image.Image) -> Image.Image:
     twidth = width[CONFIG.size] if CONFIG.size != '自适应' else img.width
     if img.width != twidth:

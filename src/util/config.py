@@ -1,8 +1,8 @@
 from typing import *
 
-class field:
+class Field:
     @staticmethod
-    def _void(value: Any) -> bool:
+    def _void(_: Any) -> bool:
         return False
     
     @overload
@@ -35,7 +35,7 @@ class field:
         return self._predicate
     
     def __eq__(self, value: object) -> bool:
-        if isinstance(value, field):
+        if isinstance(value, Field):
             return self._name == value._name and \
                    self._default == value._default and \
                    self._predicate == value._predicate
@@ -44,7 +44,7 @@ class field:
     def __hash__(self) -> int:
         hash(self._name) ^ hash(self._default) ^ hash(self._predicate)
 
-class config:
+class Config:
     def __init__(self, name: str) -> None:
         self._name = name
     
@@ -52,7 +52,7 @@ class config:
     def name(self) -> str:
         return self._name
     
-    def validate(self, fields: list[field]) -> bool:
+    def validate(self, fields: list[Field]) -> bool:
         ret = False
         all = set(self.__dict__.keys())
         for field in fields:
@@ -68,7 +68,7 @@ class config:
             ret = True
         return ret
 
-class app_configs:
+class AppConfigs:
     def __init__(self, version) -> None:
         self._version = version
         self._configs = dict()
@@ -77,10 +77,10 @@ class app_configs:
     def version(self) -> str:
         return self._version
     
-    def __getitem__(self, name: str) -> config:
+    def __getitem__(self, name: str) -> Config:
         return self._configs[name]
     
-    def __setitem__(self, name: str, value: config):
+    def __setitem__(self, name: str, value: Config):
         self._configs[name] = value
     
     def __delitem__(self, name: str):
@@ -88,3 +88,5 @@ class app_configs:
     
     def __contains__(self, name: str) -> bool:
         return name in self._configs
+
+__all__ = ["Field", "Config", "AppConfigs"]

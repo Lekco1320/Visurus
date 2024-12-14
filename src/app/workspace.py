@@ -1,48 +1,47 @@
+import util
 import os
 import tkinter as tk
 
-from util import *
-from util import menu
-from PIL  import Image
-from PIL  import ImageTk
+from PIL import Image
+from PIL import ImageTk
 
 SUPPORTED = ['.jpg', '.jpeg', '.png', '.bmp', '.gif', '.ico', '.psd', '.webp', '.tif', '.tiff']
 
-images: list[image] = []
+images: list[util.InImage] = []
 
 def main():
-    m = menu.menu('Lekco Visurus - 工作区', 'Q')
-    m.add(menu.display(display))
-    m.add(menu.option('I', '导入图像', input_main))
-    m.add(menu.option('R', '移除图像', remove_main))
-    m.add(menu.option('S', '显示图像', show_main))
-    m.add(menu.option('Q', '返回'))
+    m = util.Menu('Lekco Visurus - 工作区', 'Q')
+    m.add(util.Display(display))
+    m.add(util.Option('I', '导入图像', input_main))
+    m.add(util.Option('R', '移除图像', remove_main))
+    m.add(util.Option('S', '显示图像', show_main))
+    m.add(util.Option('Q', '返回'))
     m.run()
 
 def display():
-    print_left(f'已导入 {len(images)} 张图像:')
+    util.print_left(f'已导入 {len(images)} 张图像:')
     for i in range(len(images)):
-        print_left(f'{i + 1}. ' + images[i].formated_name())
-    print_spliter()
+        util.print_left(f'{i + 1}. ' + images[i].formated_name())
+    util.print_splitter()
 
 def check_space() -> bool:
     ret = len(images) > 0
     if not ret:
-        print_error('工作区为空.')
+        util.print_error('工作区为空.')
     return ret
 
-@errhandler
+@util.errhandler
 def choose() -> list[int]:
     if not check_space():
         return
     
-    print_output('请选择目标图像:')
-    print_ps('请用空格隔开多个索引')
-    print_ps('空输入默认全选')
-    ans = list(map(int, get_input().split()))
+    util.print_output('请选择目标图像:')
+    util.print_ps('请用空格隔开多个索引')
+    util.print_ps('空输入默认全选')
+    ans = list(map(int, util.get_input().split()))
     if len(ans) == 0:
-        up_line()
-        print_output(' '.join([str(i) for i in range(1, len(images) + 1)]))
+        util.up_line()
+        util.print_output(' '.join([str(i) for i in range(1, len(images) + 1)]))
         return [i for i in range(1, len(images) + 1)]
     for i in ans:
         if i <= 0 or i > len(images):
@@ -50,11 +49,11 @@ def choose() -> list[int]:
     return ans
 
 def input_main():
-    m = menu.menu('Lekco Visurus - 导入图像')
-    m.add(menu.option('F', '输入文件路径', input_files))
-    m.add(menu.option('P', '输入目录路径', input_folders))
-    m.add(menu.option('D', '对话框选择',   input_dialog))
-    m.add(menu.option('Q', '返回'))
+    m = util.Menu('Lekco Visurus - 导入图像')
+    m.add(util.Option('F', '输入文件路径', input_files))
+    m.add(util.Option('P', '输入目录路径', input_folders))
+    m.add(util.Option('D', '对话框选择',   input_dialog))
+    m.add(util.Option('Q', '返回'))
     m.run()
 
 def access_check(path: str) -> bool:
@@ -66,31 +65,31 @@ def access_check(path: str) -> bool:
     except:
         return False  
 
-@errhandler
+@util.errhandler
 def input_files():
-    print_output('请输入图像文件路径')
-    print_ps('多个路径请用 | 分隔.')
-    list = get_input().split('|')
+    util.print_output('请输入图像文件路径')
+    util.print_ps('多个路径请用 | 分隔.')
+    list = util.get_input().split('|')
     for path in list:
         input_file(path)
 
-@errhandler
+@util.errhandler
 def input_folders():
-    print_output('请输入图像文件路径')
-    print_ps('多个路径请用 | 分隔. 包含子文件夹.')
-    list = get_input().split('|')
+    util.print_output('请输入图像文件路径')
+    util.print_ps('多个路径请用 | 分隔. 包含子文件夹.')
+    list = util.get_input().split('|')
     for path in list:
         input_folder(path)
 
-@errhandler
+@util.errhandler
 def input_file(path: str):
     path = path.replace('"', '').strip()
     _, extension = os.path.splitext(path)
     if extension.lower() in SUPPORTED:
         if access_check(path):
-            images.append(image(path))
+            images.append(util.InImage(path))
 
-@errhandler
+@util.errhandler
 def input_folder(path: str):
     path = path.replace('"', '').strip()
     for root, dirs, files in os.walk(path):
@@ -98,7 +97,7 @@ def input_folder(path: str):
             file_path = os.path.join(root, file)
             input_file(file_path)
 
-@errhandler
+@util.errhandler
 def input_file_or_folder(path: str):
     path = path.replace('"', '').strip()
     if   os.path.isdir(path):
@@ -106,15 +105,15 @@ def input_file_or_folder(path: str):
     elif os.path.isfile(path):
         input_file(path)
 
-@errhandler
+@util.errhandler
 def input_dialog():
-    print_output('已启动文件选择器.')
+    util.print_output('已启动文件选择器.')
     from tkinter import filedialog
     filetypes = [('图像文件', ';'.join('*' + ext for ext in SUPPORTED))]
     filenames = filedialog.askopenfilenames(title='导入图像', initialdir='/', filetypes=filetypes)
     for file in filenames:
         if file not in images:
-            images.append(image(file))
+            images.append(util.InImage(file))
 
 def remove_main():
     if not check_space():
@@ -151,29 +150,29 @@ def show_main():
         with Image.open(images[id - 1].path) as img:
             image_window(img, images[id - 1].name)
 
-chosen: list[image] = []
+chosen: list[util.InImage] = []
 
 def c_init():
     global chosen
     chosen.clear()
 
 def c_display():
-    print_left(f'已选择 {len(chosen)} 张图像:')
+    util.print_left(f'已选择 {len(chosen)} 张图像:')
     for i in range(len(chosen)):
-        print_left(f'{i + 1}. ' + chosen[i].formated_name())
-    print_spliter()
+        util.print_left(f'{i + 1}. ' + chosen[i].formated_name())
+    util.print_splitter()
 
-def c_main() -> list[image]:
+def c_main() -> list[util.InImage]:
     c_init()
     
-    m = menu.menu('Lekco Visurus - 工作区', 'Q')
-    m.add(menu.display(display))
-    m.add(menu.display(c_display))
-    m.add(menu.option('I', '导入图像', input_main))
-    m.add(menu.option('C', '选择图像', choose_main))
-    m.add(menu.option('R', '移除图像', remove_main))
-    m.add(menu.option('S', '显示图像', show_main))
-    m.add(menu.option('Q', '返回'))
+    m = util.Menu('Lekco Visurus - 工作区', 'Q')
+    m.add(util.Display(display))
+    m.add(util.Display(c_display))
+    m.add(util.Option('I', '导入图像', input_main))
+    m.add(util.Option('C', '选择图像', choose_main))
+    m.add(util.Option('R', '移除图像', remove_main))
+    m.add(util.Option('S', '显示图像', show_main))
+    m.add(util.Option('Q', '返回'))
     m.run()
     return chosen
 

@@ -2,19 +2,19 @@ from .main   import main_menu, process
 from .scaler import *
 from .anchor import *
 from .mark   import *
-from .style  import style
+from .style  import Style
 
 __all__ = [
-    "scaler",
-    "fixed_scaler",
-    "scale_ref",
-    "proportion_scaler",
-    "horizonal_alignment",
-    "vertical_alignment",
-    "anchor",
-    "image_mark",
-    "label_mark",
+    "Scaler",
+    "FixedScaler",
+    "ScaleRef",
+    "ProportionScaler",
+    "HorizonalAlignment",
+    "VerticalAlignment",
+    "Anchor",
+    "ImageMark",
+    "LabelMark",
     "process",
     "main_menu",
-    "style"
+    "Style"
 ]

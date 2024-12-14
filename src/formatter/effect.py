@@ -1,9 +1,6 @@
 import util
 import watermark
 
-from util import *
-from util import menu
-
 from app import output
 from app import workspace
 from app import appconfig
@@ -11,43 +8,43 @@ from app import appconfig
 from formatter import shadow
 from formatter import round_corner
 
-from PIL import Image
+from PIL       import Image
 
 CONFIG = appconfig.get('effect', [
-    util.field('shadow',    False),
-    util.field('sstyle',    shadow.style.DEFAULT,       shadow.style.self_validate),
-    util.field('round',     False),
-    util.field('rstyle',    round_corner.style.DEFAULT, round_corner.style.self_validate),
-    util.field('order',     ('阴影', '圆角', '水印')),
-    util.field('watermark', False),
-    util.field('wstyle',    watermark.style.DEFAULT,    watermark.style.self_validate),
+    util.Field('shadow',    False),
+    util.Field('sstyle',    shadow.Style.DEFAULT,       shadow.Style.self_validate),
+    util.Field('round',     False),
+    util.Field('rstyle',    round_corner.Style.DEFAULT, round_corner.Style.self_validate),
+    util.Field('order',     ('阴影', '圆角', '水印')),
+    util.Field('watermark', False),
+    util.Field('wstyle',    watermark.Style.DEFAULT,    watermark.Style.self_validate),
 ])
 
 targets = []
 
 def main():
-    m = menu.menu('Lekco Visurus - 图像效果', 'Q')
-    m.add(menu.display(display))
-    m.add(menu.splitter('- 效果设置 -'))
-    m.add(menu.option('H', '图像阴影',  h_main,    h_value))
-    m.add(menu.option('A', '阴影效果…', CONFIG.sstyle.set, enfunc=lambda: CONFIG.shadow))
-    m.add(menu.option('R', '图像圆角',  r_main,    r_value))
-    m.add(menu.option('D', '圆角参数',  CONFIG.rstyle.set, enfunc=lambda: CONFIG.round))
-    m.add(menu.option('W', '图像水印',  w_main,    w_value))
-    m.add(menu.option('T', '水印样式…', CONFIG.wstyle.set, enfunc=lambda: CONFIG.watermark))
-    m.add(menu.option('E', '效果顺序', set_order, get_order))
-    m.add(menu.option('Y', '保存当前设置', lambda: appconfig.save(CONFIG)))
-    m.add(menu.splitter('- 导入与导出 -'))
-    m.add(menu.option('C', '选择目标图像…', choose_targets))
-    m.add(menu.option('O', '执行导出…',    execute))
-    m.add(menu.option('Q', '返回'))
+    m = util.Menu('Lekco Visurus - 图像效果', 'Q')
+    m.add(util.Display(display))
+    m.add(util.Splitter('- 效果设置 -'))
+    m.add(util.Option('H', '图像阴影',  h_main,    h_value))
+    m.add(util.Option('A', '阴影效果…', CONFIG.sstyle.set, enfunc=lambda: CONFIG.shadow))
+    m.add(util.Option('R', '图像圆角',  r_main,    r_value))
+    m.add(util.Option('D', '圆角参数',  CONFIG.rstyle.set, enfunc=lambda: CONFIG.round))
+    m.add(util.Option('W', '图像水印',  w_main,    w_value))
+    m.add(util.Option('T', '水印样式…', CONFIG.wstyle.set, enfunc=lambda: CONFIG.watermark))
+    m.add(util.Option('E', '效果顺序', set_order, get_order))
+    m.add(util.Option('Y', '保存当前设置', lambda: appconfig.save(CONFIG)))
+    m.add(util.Splitter('- 导入与导出 -'))
+    m.add(util.Option('C', '选择目标图像…', choose_targets))
+    m.add(util.Option('O', '执行导出…',    execute))
+    m.add(util.Option('Q', '返回'))
     m.run()
 
 def display():
-    print_left(f'已选择 {len(targets)} 张目标图像:')
+    util.print_left(f'已选择 {len(targets)} 张目标图像:')
     for i in range(len(targets)):
-        print_left(f'{i + 1}. ' + targets[i].formated_name())
-    print_spliter()
+        util.print_left(f'{i + 1}. ' + targets[i].formated_name())
+    util.print_splitter()
 
 # 选择图片对象
 def choose_targets():
@@ -57,9 +54,9 @@ def choose_targets():
 #region 图像阴影
 
 def h_main():
-    m = menu.menu('Lekco Visurus - 图像阴影')
-    m.add(menu.option('E', '启用', h_enable))
-    m.add(menu.option('D', '关闭', h_disable))
+    m = util.Menu('Lekco Visurus - 图像阴影')
+    m.add(util.Option('E', '启用', h_enable))
+    m.add(util.Option('D', '关闭', h_disable))
     m.run()
 
 def h_enable():
@@ -76,9 +73,9 @@ def h_value() -> str:
 #region 图像圆角
 
 def r_main():
-    m = menu.menu('Lekco Visurus - 图像圆角')
-    m.add(menu.option('E', '启用', r_enable))
-    m.add(menu.option('D', '关闭', r_disable))
+    m = util.Menu('Lekco Visurus - 图像圆角')
+    m.add(util.Option('E', '启用', r_enable))
+    m.add(util.Option('D', '关闭', r_disable))
     m.run()
 
 def r_enable():
@@ -95,9 +92,9 @@ def r_value() -> str:
 #region 图像水印
 
 def w_main():
-    m = menu.menu('Lekco Visurus - 图像水印')
-    m.add(menu.option('E', '启用', w_enable))
-    m.add(menu.option('D', '关闭', w_disable))
+    m = util.Menu('Lekco Visurus - 图像水印')
+    m.add(util.Option('E', '启用', w_enable))
+    m.add(util.Option('D', '关闭', w_disable))
     m.run()
 
 def w_enable():
@@ -113,11 +110,11 @@ def w_value() -> str:
 
 #region 效果顺序
 
-@errhandler
+@util.errhandler
 def set_order():
-    print_output('请输入效果顺序:')
-    print_ps('例: 阴影 圆角 水印')
-    ans = get_input().strip().split()
+    util.print_output('请输入效果顺序:')
+    util.print_ps('例: 阴影 圆角 水印')
+    ans = util.get_input().strip().split()
     add = set()
     for effect in ans:
         if effect not in ['阴影', '圆角', '水印']:
@@ -132,16 +129,16 @@ def get_order() -> str:
 
 #endregion
 
-@errhandler
+@util.errhandler
 def execute():
     if len(targets) <= 0:
         raise ValueError('目标图像为空.')
     
     out = []
     for srcimg in targets:
-        print_output(f'正在处理 {srcimg.name}...')
+        util.print_output(f'正在处理 {srcimg.name}...')
         processed = process(srcimg.image)
-        out.append(output.outimage(processed, srcimg))
+        out.append(output.OutImage(processed, srcimg))
     
     if len(out) > 0:
         output.main(out)
@@ -155,7 +152,7 @@ def apply_round(image: Image.Image) -> Image.Image:
 def apply_watermark(image: Image.Image) -> Image.Image:
     return watermark.process(CONFIG.wstyle, image) if CONFIG.watermark else image
 
-@errhandler
+@util.errhandler
 def process(image: Image.Image):
     for effect in CONFIG.order:
         if   effect == '阴影':
@@ -166,16 +163,16 @@ def process(image: Image.Image):
             image = apply_watermark(image)
     return image
 
-@errhandler
+@util.errhandler
 def execute():
     if len(targets) <= 0:
         raise ValueError('目标图像为空.')
     
     out = []
     for srcimg in targets:
-        print_output(f'正在处理 {srcimg.name}...')
+        util.print_output(f'正在处理 {srcimg.name}...')
         processed = process(srcimg.image)
-        out.append(output.outimage(processed, srcimg))
+        out.append(output.OutImage(processed, srcimg))
     
     if len(out) > 0:
         output.main(out)

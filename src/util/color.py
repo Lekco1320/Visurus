@@ -1,7 +1,9 @@
-from util   import *
+from .printer    import *
+from .decorators import *
+
 from typing import overload
 
-class color:
+class Color:
     @overload
     def __init__(self, value: tuple) -> None:
         """value: (R, G, B, A)"""
@@ -13,23 +15,23 @@ class color:
         ...
     
     def __init__(self, value: tuple | str) -> None:
-        self._r, self._g, self._b, self._a = color.check(value)
+        self._r, self._g, self._b, self._a = Color.check(value)
     
     @staticmethod
     def check(value: tuple | str) -> tuple[int, int, int, int]:
         r, g, b, a = 255, 255, 255, 255
         if  isinstance(value, tuple):
-            r = color._check_channel(value[0])
-            g = color._check_channel(value[1])
-            b = color._check_channel(value[2])
-            a = color._check_channel(value[3]) if len(value) > 3 else 255
+            r = Color._check_channel(value[0])
+            g = Color._check_channel(value[1])
+            b = Color._check_channel(value[2])
+            a = Color._check_channel(value[3]) if len(value) > 3 else 255
         elif isinstance(value, str):
             if value.startswith('#'):
                 value = value[1:]
-            r = color._check_channel(value[0:2])
-            g = color._check_channel(value[2:4])
-            b = color._check_channel(value[4:6])
-            a = color._check_channel(value[6:8]) if len(value) > 7 else 255
+            r = Color._check_channel(value[0:2])
+            g = Color._check_channel(value[2:4])
+            b = Color._check_channel(value[4:6])
+            a = Color._check_channel(value[6:8]) if len(value) > 7 else 255
         return (r, g, b, a)
     
     @staticmethod
@@ -56,7 +58,7 @@ class color:
     
     @classmethod
     @errhandler
-    def input() -> 'color':
+    def input() -> 'Color':
         print_output('请任选一种格式输入颜色值:')
         print_ps('分量表示: R,G,B')
         print_ps('十六进制表示: #??????')
@@ -66,7 +68,7 @@ class color:
             c = ans
         else:
             c = tuple(map(int, ans.split(',')))
-        c = color(c)
+        c = Color(c)
         print_output('请任选一种格式输入不透明度:')
         print_ps('百分比表示: ??%')
         print_ps('十进制表示: 0~255')
@@ -82,3 +84,5 @@ class color:
             raise ValueError(f'非法不透明度值 \'{opc}%\'.')
         c._a = int(opc)
         return c
+
+__all__ = ["Color"]

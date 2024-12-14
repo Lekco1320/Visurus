@@ -1,91 +1,89 @@
-from util import *
-from util import config
-from util import menu
+import util
 
 from PIL import Image
 from PIL import ImageFilter
 
-class style(config.config):
+class Style(util.Config):
     FIELDS = [
-        config.field('color',  color('#0000007F')),
-        config.field('offset', (10, 10)),
-        config.field('limit',  (8, 8)),
-        config.field('blur',   5),
+        util.Field('color',  util.Color('#0000007F')),
+        util.Field('offset', (10, 10)),
+        util.Field('limit',  (8, 8)),
+        util.Field('blur',   5),
     ]
     
     DEFAULT = None
     
     @classmethod
-    def default(cls) -> 'style':
-        ret = style()
-        ret.validate(style.FIELDS)
+    def default(cls) -> 'Style':
+        ret = Style()
+        ret.validate(Style.FIELDS)
         return ret
     
     def __init__(self) -> None:
         super().__init__('')
-        self.validate(style.FIELDS)
+        self.validate(Style.FIELDS)
     
     def self_validate(self) -> bool:
-        return super().validate(style.FIELDS)
+        return super().validate(Style.FIELDS)
 
     def set(self):
         style_main(self)
 
-style.DEFAULT = style.default()
+Style.DEFAULT = Style.default()
 
-def style_main(style: style):
-    m = menu.menu('Lekco Visurus - 阴影效果', 'Q')
-    m.add(menu.option('C', '阴影颜色', lambda: set_color(style),  lambda: get_color(style)))
-    m.add(menu.option('O', '阴影偏移', lambda: set_offset(style), lambda: get_offset(style)))
-    m.add(menu.option('L', '范围限制', lambda: set_limit(style),  lambda: get_limit(style)))
-    m.add(menu.option('B', '模糊程度', lambda: set_blur(style),   lambda: get_blur(style)))
-    m.add(menu.option('Q', '返回'))
+def style_main(style: Style):
+    m = util.Menu('Lekco Visurus - 阴影效果', 'Q')
+    m.add(util.Option('C', '阴影颜色', lambda: set_color(style),  lambda: get_color(style)))
+    m.add(util.Option('O', '阴影偏移', lambda: set_offset(style), lambda: get_offset(style)))
+    m.add(util.Option('L', '范围限制', lambda: set_limit(style),  lambda: get_limit(style)))
+    m.add(util.Option('B', '模糊程度', lambda: set_blur(style),   lambda: get_blur(style)))
+    m.add(util.Option('Q', '返回'))
     m.run()
 
-def set_color(style: style):
-    style.color = color.input()
+def set_color(style: Style):
+    style.color = util.Color.input()
 
-def get_color(style: style) -> str:
+def get_color(style: Style) -> str:
     return style.color.hex
 
-@errhandler
-def set_offset(style: style):
-    print_output('请输入偏移量 x,y :')
-    ans = list(map(int, get_input().split(',')))
+@util.errhandler
+def set_offset(style: Style):
+    util.print_output('请输入偏移量 x,y :')
+    ans = list(map(int, util.get_input().split(',')))
     if len(ans) != 2:
         raise ValueError(f'错误的坐标分量数 \'{len(ans)}\'.')
     style.offset = (ans[0], ans[1])
 
-def get_offset(style: style) -> str:
+def get_offset(style: Style) -> str:
     return style.offset.__str__()
 
-@errhandler
-def set_limit(style: style):
-    print_output('请输入范围限制 x,y:')
-    ans = list(map(int, get_input().split(',')))
+@util.errhandler
+def set_limit(style: Style):
+    util.print_output('请输入范围限制 x,y:')
+    ans = list(map(int, util.get_input().split(',')))
     if len(ans) != 2:
         raise ValueError(f'错误的坐标分量数 \'{len(ans)}\'.')
     style.limit = (ans[0], ans[1])
 
-def get_limit(style: style) -> str:
+def get_limit(style: Style) -> str:
     return style.limit.__str__()
 
-@errhandler
-def set_blur(style: style):
-    print_output('请输入模糊程度(>=0):')
-    ans = int(get_input())
+@util.errhandler
+def set_blur(style: Style):
+    util.print_output('请输入模糊程度(>=0):')
+    ans = int(util.get_input())
     if ans < 0:
         raise ValueError(f'模糊程度 \'{ans}\' 无效.')
     style.blur = ans
 
-def get_blur(style: style) -> str:
+def get_blur(style: Style) -> str:
     return style.blur.__str__()
 
-def process(style: style, image: Image.Image) -> Image.Image:
+def process(style: Style, image: Image.Image) -> Image.Image:
     return _blur(image, style.offset, style.limit, style.color, style.blur)
 
 # https://code.activestate.com/recipes/474116-drop-shadows-with-pil/
-def _blur(image: Image.Image, offset: tuple, limit: tuple, color: color, depth: int) -> Image.Image:
+def _blur(image: Image.Image, offset: tuple, limit: tuple, color: util.Color, depth: int) -> Image.Image:
     """
     Add a gaussian blur drop shadow to an image.
     image       - The image to overlay on top of the shadow.

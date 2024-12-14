@@ -1,14 +1,15 @@
+import util
 import pickle
 import readline
 
-from .               import appdir
-from pathlib         import Path
-from util.decorators import errhandler, nohistory
+from . import appdir
+
+from pathlib import Path
 
 HISTORY_FILE: Path              = appdir.APPDIR / 'history.bin'
 histories: dict[str, list[str]] = {}
 
-@errhandler
+@util.errhandler
 def read_history():
     global histories
     if not HISTORY_FILE.exists():
@@ -26,7 +27,7 @@ def load_history(key: str):
     for item in items:
         readline.add_history(item)
 
-@errhandler
+@util.errhandler
 def save_distory(key: str):
     items = histories[key]
     items.clear()
