@@ -5,16 +5,7 @@ from pathlib import Path
 
 APPDIR: Path = None
 
-def check_appdir():
-    global APPDIR
-    if APPDIR != None:
-        return
-    
-    system = platform.system()
-    if system == "Windows":
-        app_resource = Path(os.getenv("APPDATA")) / "Lekco" / "Visurus"
-    elif system in ["Linux", "Darwin"]:
-        app_resource = Path.home() / ".config" / "Lekco" / "Visurus"
-    APPDIR = app_resource
-
-check_appdir()
+if   platform.system() == "Windows":
+    APPDIR = Path(os.getenv("APPDATA")) / "Lekco" / "Visurus"
+elif platform.system() in ["Linux", "Darwin"]:
+    APPDIR = Path.home() / ".config" / "Lekco" / "Visurus"

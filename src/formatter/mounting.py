@@ -1,6 +1,7 @@
 import util
 import watermark
 
+from app import input
 from app import output
 from app import workspace
 from app import appconfig
@@ -53,18 +54,14 @@ def margin_main(attrname: str):
 
 @util.errhandler
 def margin_fixed(attrname: str):
-    util.print_output('请输入尺寸值(正整数):')
-    value = int(input())
-    if value <= 0:
-        raise ValueError('尺寸值必须为正整数.')
+    util.print_output('请输入尺寸值(>0):')
+    value = input.input_int(lLimit=[0, False])
     setattr(CONFIG, attrname, value)
 
 @util.errhandler
 def margin_propotion(attrname: str):
     util.print_output('请输入比例(%):')
-    value = float(int(input()) / 100)
-    if value <= 0:
-        raise ValueError('比例值不得为负.')
+    value = input.input_float(lLimit=[0, False])
     setattr(CONFIG, attrname, value)
 
 def margin_value(attrname: str):
@@ -75,7 +72,7 @@ def margin_value(attrname: str):
         return f'{attr * 100}%'
 
 def set_color():
-    CONFIG.color = util.Color.input()
+    CONFIG.color = input.input_color()
 
 def get_color() -> str:
     return CONFIG.color.hex

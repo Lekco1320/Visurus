@@ -55,34 +55,5 @@ class Color:
     
     def __str__(self) -> str:
         return self.hex
-    
-    @classmethod
-    @errhandler
-    def input() -> 'Color':
-        print_output('请任选一种格式输入颜色值:')
-        print_ps('分量表示: R,G,B')
-        print_ps('十六进制表示: #??????')
-        ans = get_input()
-        c   = None
-        if ans.startswith('#'):
-            c = ans
-        else:
-            c = tuple(map(int, ans.split(',')))
-        c = Color(c)
-        print_output('请任选一种格式输入不透明度:')
-        print_ps('百分比表示: ??%')
-        print_ps('十进制表示: 0~255')
-        print_ps('十六进制表示: #??')
-        ans = get_input()
-        if   ans.endswith('%'):
-            opc = int(ans[:-1]) / 100 * 255
-        elif ans.startswith('#'):
-            opc = int(ans[1:], 16)
-        else:
-            opc = int(ans)
-        if opc < 0 or opc > 255:
-            raise ValueError(f'非法不透明度值 \'{opc}%\'.')
-        c._a = int(opc)
-        return c
 
 __all__ = ["Color"]

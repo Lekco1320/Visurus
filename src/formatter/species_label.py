@@ -335,11 +335,11 @@ def process(img: Image.Image) -> Image.Image:
     final = Image.new('RGBA', (img.width + params['pic_margin'] * 2, img.height + params['pic_margin'] + params['pic_bottom']), 'white')
     final.paste(img, (params['pic_margin'], params['pic_margin']), img)
     draw    = ImageDraw.Draw(final)
-    fname   = ImageFont.truetype(resources.get(resources.font.SONGTI_BOLD),   params['name_fsize'])
-    fps     = ImageFont.truetype(resources.get(resources.font.SONGTI_BOLD),   params['ps_fsize'])
-    flatin  = ImageFont.truetype(resources.get(resources.font.TIMES_BITALIC), params['latin_fsize'])
-    fgender = ImageFont.truetype(resources.get(resources.font.TIMES_BOLD),    params['latin_fsize'])
-    fother  = ImageFont.truetype(resources.get(resources.font.SONGTI_BOLD),   params['other_fsize'])
+    fname   = ImageFont.truetype(resources.get(resources.Font.SONGTI_BOLD),   params['name_fsize'])
+    fps     = ImageFont.truetype(resources.get(resources.Font.SONGTI_BOLD),   params['ps_fsize'])
+    flatin  = ImageFont.truetype(resources.get(resources.Font.TIMES_BITALIC), params['latin_fsize'])
+    fgender = ImageFont.truetype(resources.get(resources.Font.TIMES_BOLD),    params['latin_fsize'])
+    fother  = ImageFont.truetype(resources.get(resources.Font.SONGTI_BOLD),   params['other_fsize'])
     
     bottom = params['pic_margin'] + img.height
     draw.text((params['pic_margin'], bottom + params['name_offset']), species_name.raw, 'black', fname)
@@ -354,7 +354,7 @@ def process(img: Image.Image) -> Image.Image:
     x    = params['pic_margin'] + params['pic_width'] - w
     draw.text((x, y), location, 'black', fother)
     x   -= params['location_margin'] + params['other_fsize']
-    limg = Image.open(resources.get(resources.icon.LOCATION)).resize((params['other_fsize'] + 4, params['other_fsize'] + 4))
+    limg = Image.open(resources.get(resources.Icon.LOCATION)).resize((params['other_fsize'] + 4, params['other_fsize'] + 4))
     final.paste(limg, (int(x), int(y + params['other_fsize'] * 0.35)), limg)
     y   += params['date_offset'] - params['other_fsize']
     w    = draw.textlength(date, fother)
@@ -375,9 +375,9 @@ def process(img: Image.Image) -> Image.Image:
     y  = bottom + params['name_offset'] + params['name_fsize'] - params['gender_size'] / 2
     gimg: Image.Image
     if   gender == '雄性':
-        gimg = Image.open(resources.get(resources.icon.MALE))
+        gimg = Image.open(resources.get(resources.Icon.MALE))
     elif gender == '雌性':
-        gimg = Image.open(resources.get(resources.icon.FEMALE))
+        gimg = Image.open(resources.get(resources.Icon.FEMALE))
     if   gender != '未知':
         gimg = gimg.resize((params['gender_size'], params['gender_size']))
         final.paste(gimg, (int(x), int(y)), gimg)

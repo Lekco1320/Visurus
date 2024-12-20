@@ -1,6 +1,7 @@
 import util
 import watermark
 
+from app import input
 from app import output
 from app import workspace
 from app import appconfig
@@ -308,14 +309,12 @@ def blur_main():
 @util.errhandler
 def blur_set_blur():
     util.print_output('请输入模糊半径:')
-    CONFIG.back_blur[2] = int(util.get_input())
+    CONFIG.back_blur[2] = input.input_int(lLimit=[0, True])
 
 @util.errhandler
 def blur_set_brightness():
     util.print_output('请输入亮度(%):')
-    ans = int(util.get_input())
-    if ans < 0 or ans > 100:
-        raise ValueError(f'非法的亮度值 \'{ans}\'')
+    ans = input.input_float(lLimit=[0, True], uLimit=[100, True])
     CONFIG.back_blur[3] = ans / 100
 
 #endregion
@@ -369,8 +368,8 @@ def process_bottom_side(image: Image.Image) -> Image.Image:
     final  = Image.new('RGBA', (width + margin * 2, height + margin + bottom), (255, 255, 255))
     final.paste(image, (margin, margin), image)
     
-    light = ImageFont.truetype(resources.get(resources.font.PUHUI_LIGHT), font)
-    bold  = ImageFont.truetype(resources.get(resources.font.PUHUI_BOLD), font)
+    light = ImageFont.truetype(resources.get(resources.Font.PUHUI_LIGHT), font)
+    bold  = ImageFont.truetype(resources.get(resources.Font.PUHUI_BOLD), font)
     draw  = ImageDraw.Draw(final)
     sget  = lambda id: param_to_str('bottom_side', id)
     
@@ -397,9 +396,9 @@ def process_bottom_center(image: Image.Image) -> Image.Image:
     final.paste(image, (margin, margin), image)
     sget  = lambda id: param_to_str('bottom_center', id)
     
-    light   = ImageFont.truetype(resources.get(resources.font.PUHUI_LIGHT), font2)
-    regular = ImageFont.truetype(resources.get(resources.font.PUHUI_REGULAR), font1)
-    bold    = ImageFont.truetype(resources.get(resources.font.PUHUI_BOLD), font1)
+    light   = ImageFont.truetype(resources.get(resources.Font.PUHUI_LIGHT), font2)
+    regular = ImageFont.truetype(resources.get(resources.Font.PUHUI_REGULAR), font1)
+    bold    = ImageFont.truetype(resources.get(resources.Font.PUHUI_BOLD), font1)
     draw    = ImageDraw.Draw(final)
     
     len0 = draw.textlength(sget(0), regular)
@@ -435,8 +434,8 @@ def process_blur(image: Image.Image) -> Image.Image:
     final.paste(image, (margin, margin), image)
     sget = lambda id: param_to_str('back_blur', id)
     
-    bold    = ImageFont.truetype(resources.get(resources.font.PUHUI_BOLD), font1)
-    regular = ImageFont.truetype(resources.get(resources.font.PUHUI_REGULAR), font2)
+    bold    = ImageFont.truetype(resources.get(resources.Font.PUHUI_BOLD), font1)
+    regular = ImageFont.truetype(resources.get(resources.Font.PUHUI_REGULAR), font2)
     draw    = ImageDraw.Draw(final)
     
     len0 = draw.textlength(sget(0), bold)

@@ -67,19 +67,15 @@ def access_check(path: str) -> bool:
 
 @util.errhandler
 def input_files():
-    util.print_output('请输入图像文件路径')
-    util.print_ps('多个路径请用 | 分隔.')
-    list = util.get_input().split('|')
-    for path in list:
-        input_file(path)
+    util.print_output('请输入图像文件路径:')
+    path = util.get_input()
+    input_file(path)
 
 @util.errhandler
 def input_folders():
-    util.print_output('请输入图像文件路径')
-    util.print_ps('多个路径请用 | 分隔. 包含子文件夹.')
-    list = util.get_input().split('|')
-    for path in list:
-        input_folder(path)
+    util.print_output('请输入图像目录路径:')
+    path = util.get_input()
+    input_folder(path)
 
 @util.errhandler
 def input_file(path: str):

@@ -10,7 +10,6 @@ from pathlib import Path
 CONFIG_FILE: Path            = appdir.APPDIR / "config.bin"
 APP_CONFIGS: util.AppConfigs = None
 
-@util.errhandler
 def load():
     global APP_CONFIGS
     if not CONFIG_FILE.exists():
@@ -18,7 +17,12 @@ def load():
         return
 
     with open(CONFIG_FILE, 'rb') as file:
-        APP_CONFIGS = pickle.load(file)
+        try:
+            APP_CONFIGS = pickle.load(file)
+        except:
+            file.close()
+            APP_CONFIGS = util.AppConfigs(about.VERSION)
+            _save()
 
 @util.errhandler
 def _save() -> bool:

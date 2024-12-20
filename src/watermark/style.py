@@ -1,6 +1,7 @@
 import util
 import os
 
+from app import input
 from app import resources
 
 #region 变量
@@ -8,7 +9,7 @@ from app import resources
 class Style(util.Config):
     FIELDS = [
         util.Field('content',  '文字'),
-        util.Field('font',     resources.font.TIMES_REGULAR),
+        util.Field('font',     resources.Font.TIMES_REGULAR),
         util.Field('color',    util.Color('#0000007F')),
         util.Field('text',     'Lekco'),
         util.Field('psource',  '无'),
@@ -85,7 +86,7 @@ def f_main(style: Style):
     style.font = resources.font_main(style.font)
 
 def f_value(style: Style) -> str:
-    return util.fomit_path('* F | 水印字体: {} *', style.font.__str__())
+    return util.fomit_path('* F | 水印字体: {} *', resources.font_name(style.font))
 
 #endregion
 
@@ -93,7 +94,7 @@ def f_value(style: Style) -> str:
 
 @util.errhandler
 def set_color(style: Style):
-    style.color = util.Color.input()
+    style.color = input.input_color()
 
 def get_color(style: Style) -> str:
     return style.color.hex
@@ -131,10 +132,7 @@ def get_psource(style: Style) -> str:
 @util.errhandler
 def set_opacity(style: Style):
     util.print_output('请输入不透明度(%):')
-    opc = float(util.get_input())
-    if opc < 0 or opc > 100:
-        raise ValueError(f'无效不透明度值 \'{opc}%\'.')
-    style.opacity = opc
+    style.opacity = input.input_float(lLimit=[0, True], uLimit=[100, True])
 
 def get_opacity(style: Style) -> str:
     return f'{style.opacity}%'
@@ -229,14 +227,8 @@ def z_proportion_scale_mode(style: Style):
 def z_set_size(style: Style):
     util.print_output('请输入尺寸大小 w,h:')
     util.print_ps('输入\'*\'自适应大小')
-    ans = list(map(str, util.get_input().split(',')))
-    if len(ans) != 2:
-        raise ValueError(f'错误的尺寸 \'{ans}\'.')
-    for i in range(2):
-        if ans[i].strip() == '*':
-            ans[i] = '*'
-        else:
-            ans[i] = int(ans[i])
+    ans = input.input_size(xRange=[input.Operator.GREATER, 0], \
+                           yRange=[input.Operator.GREATER, 0])
     if ans == ('*', '*') and style.content == '文字':
         raise ValueError('文字水印的尺寸大小不得为长宽自适应.')
     style.scale[1] = ans
@@ -261,10 +253,7 @@ def z_height_ref(style: Style):
 @util.errhandler
 def z_set_proportion(style: Style):
     util.print_output('请输入缩放比例(%):')
-    p = float(util.get_input())
-    if p <= 0:
-        raise ValueError(f'非法缩放比例 \'{p}%\'.')
-    style.scale[2] = p / 100
+    style.scale[2] = input.input_float(lLimit=[0, False]) / 100
 
 def z_get_propotion(style: Style) -> str:
     return f'{style.scale[2] * 100}%'
@@ -325,13 +314,8 @@ def p_9(style: Style):
 @util.errhandler
 def p_pose(style: Style):
     util.print_output('请输入水印位置 x,y:')
-    ans = list(map(int, util.get_input().split(',')))
-    if len(ans) != 2:
-        raise ValueError(f'错误的坐标分量数 \'{len(ans)}\'.')
-    for i in ans:
-        if i < 0:
-            raise ValueError(f'非法的坐标 \'{ans[0]}, {ans[1]}\'.')
-    style.position = (ans[0], ans[1])
+    style.position = input.input_int_coordinate(xRange=[input.Operator.GREATER_EQ, 0], \
+                                                yRange=[input.Operator.GREATER_EQ, 0])
 
 def p_random(style: Style):
     style.position = '随机'
@@ -346,10 +330,7 @@ def p_value(style: Style) -> str:
 @util.errhandler
 def set_offset(style: Style):
     util.print_output('请输入位置偏移 x,y:')
-    ans = list(map(int, util.get_input().split(',')))
-    if len(ans) != 2:
-        raise ValueError(f'错误的坐标分量数 \'{len(ans)}\'.')
-    style.offset = (ans[0], ans[1])
+    style.offset = input.input_int_coordinate()
 
 def get_offset(style: Style) -> str:
     return style.offset.__str__()

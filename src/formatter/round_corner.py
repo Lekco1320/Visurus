@@ -1,5 +1,6 @@
 import util
 
+from app import input
 from PIL import Image
 from PIL import ImageDraw
 
@@ -36,9 +37,7 @@ def style_main(style: Style):
 @util.errhandler
 def set_radius(style: Style):
     util.print_output('请输入圆角半径:')
-    value = int(util.get_input())
-    if value < 0:
-        raise ValueError(f'非法的圆角半径值 {value}')
+    value = input.input_int(lLimit=[0, True])
     style.radius = value
 
 def get_radius(style: Style) -> str:

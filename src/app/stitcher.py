@@ -1,5 +1,6 @@
 import util
 
+from . import input
 from . import appconfig
 from . import output
 from . import workspace
@@ -176,7 +177,7 @@ def get_spacing() -> str:
 #region 背景颜色
 
 def set_background():
-    CONFIG.background = util.Color.input()
+    CONFIG.background = input.input_color()
 
 def get_background() -> str:
     return CONFIG.background.hex

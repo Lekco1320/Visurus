@@ -184,6 +184,8 @@ class Menu:
         print_title(self._title)
         for display in self._displays:
             display.show()
+        if len(self._pages) == 0:
+            return
         for item in self._pages[self._curpage]:
             if item.enabled:
                 item.show()
@@ -196,13 +198,17 @@ class Menu:
         return get_input().strip().upper()
     
     def _jump(self, key: str) -> bool:
+        if key == self._retsign:
+            return True
+        if len(self._pages) == 0:
+            return False
         for item in self._pages[self._curpage]:
             if isinstance(item, Option) and item.key == key and item.enabled:
                 up_line()
                 print_output(f'{item.key} | {item.text}')
                 item.jump()
                 break
-        return self._retsign in [key, None]
+        return self._retsign == None
     
     def _fill_page_top(self, page: list[Option]):
         index = 0
@@ -253,7 +259,9 @@ class Menu:
             self._pages.append(page)
     
     def _change_page(self):
-        self._curpage = (self._curpage + 1) % len(self._pages)
+        pcount = len(self._pages)
+        if pcount > 0:
+            self._curpage = (self._curpage + 1) % pcount
     
     def run(self):
         self._divide_pages()

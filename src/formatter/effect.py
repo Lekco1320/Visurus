@@ -1,6 +1,7 @@
 import util
 import watermark
 
+from app import input
 from app import output
 from app import workspace
 from app import appconfig
@@ -8,7 +9,7 @@ from app import appconfig
 from formatter import shadow
 from formatter import round_corner
 
-from PIL       import Image
+from PIL import Image
 
 CONFIG = appconfig.get('effect', [
     util.Field('shadow',    False),
@@ -114,15 +115,7 @@ def w_value() -> str:
 def set_order():
     util.print_output('请输入效果顺序:')
     util.print_ps('例: 阴影 圆角 水印')
-    ans = util.get_input().strip().split()
-    add = set()
-    for effect in ans:
-        if effect not in ['阴影', '圆角', '水印']:
-            raise ValueError('未知的效果名称')
-        add.add(effect)
-    if len(add) != 3:
-        raise ValueError('效果数量错误.')
-    CONFIG.order = tuple(ans)
+    CONFIG.order = input.input_valid_sequence(['阴影', '圆角', '水印'])
 
 def get_order() -> str:
     return '→'.join(CONFIG.order)

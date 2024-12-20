@@ -1,5 +1,6 @@
 import util
 
+from app import input
 from PIL import Image
 from PIL import ImageFilter
 
@@ -41,7 +42,7 @@ def style_main(style: Style):
     m.run()
 
 def set_color(style: Style):
-    style.color = util.Color.input()
+    style.color = input.input_color()
 
 def get_color(style: Style) -> str:
     return style.color.hex
@@ -49,10 +50,7 @@ def get_color(style: Style) -> str:
 @util.errhandler
 def set_offset(style: Style):
     util.print_output('请输入偏移量 x,y :')
-    ans = list(map(int, util.get_input().split(',')))
-    if len(ans) != 2:
-        raise ValueError(f'错误的坐标分量数 \'{len(ans)}\'.')
-    style.offset = (ans[0], ans[1])
+    style.offset = input.input_int_coordinate()
 
 def get_offset(style: Style) -> str:
     return style.offset.__str__()
@@ -60,10 +58,7 @@ def get_offset(style: Style) -> str:
 @util.errhandler
 def set_limit(style: Style):
     util.print_output('请输入范围限制 x,y:')
-    ans = list(map(int, util.get_input().split(',')))
-    if len(ans) != 2:
-        raise ValueError(f'错误的坐标分量数 \'{len(ans)}\'.')
-    style.limit = (ans[0], ans[1])
+    style.limit = input.input_int_coordinate()
 
 def get_limit(style: Style) -> str:
     return style.limit.__str__()
@@ -71,10 +66,7 @@ def get_limit(style: Style) -> str:
 @util.errhandler
 def set_blur(style: Style):
     util.print_output('请输入模糊程度(>=0):')
-    ans = int(util.get_input())
-    if ans < 0:
-        raise ValueError(f'模糊程度 \'{ans}\' 无效.')
-    style.blur = ans
+    style.blur = input.input_int(lLimit=[0, True])
 
 def get_blur(style: Style) -> str:
     return style.blur.__str__()

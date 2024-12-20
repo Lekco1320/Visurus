@@ -202,7 +202,7 @@ def print_output(text: strLike):
     print(f'> {text}')
 
 def print_ps(text: str):
-    print_output(AnsiStr('* ' + text, FORMAT_PS))
+    print_output(AnsiStr(text, FORMAT_PS))
 
 def wait(t: float = 1.5):
     time.sleep(t)
