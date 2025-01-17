@@ -246,7 +246,7 @@ def execute():
     else:
         out = v_process(imgs)
     
-    out = output.OutImage(out, targets[0])
+    out = util.OutImage(out, targets[0])
     output.main([out])
 
 #endregion

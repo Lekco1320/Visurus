@@ -310,7 +310,7 @@ def execute():
     for srcimg in targets:
         util.print_output(f'正在处理 {srcimg.name}...')
         processed = process(srcimg.image)
-        out.append(output.OutImage(processed, srcimg))
+        out.append(util.OutImage(processed, srcimg))
     
     if len(out) > 0:
         output.main(out)

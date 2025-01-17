@@ -347,7 +347,7 @@ def process(image: util.InImage, menu: util.Menu):
         img = process_blur(img)
     if CONFIG.watermark:
         img = watermark.main.process(CONFIG.wstyle, img)
-    out.append(output.OutImage(img, image))
+    out.append(util.OutImage(img, image))
     menu.exit()
 
 def resize(image: Image.Image) -> Image.Image:
