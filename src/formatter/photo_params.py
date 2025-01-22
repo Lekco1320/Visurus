@@ -20,7 +20,7 @@ from formatter    import shadow
 #region 变量
 
 targets: list[util.InImage] = []
-out: list[util.OutImage]  = []
+out: list[util.OutImage]    = []
 
 CONFIG = appconfig.get('photo_params', [
     util.Field('size',          '2K'),

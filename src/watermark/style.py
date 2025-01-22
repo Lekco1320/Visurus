@@ -117,10 +117,9 @@ def get_text(style: Style) -> str:
 @util.errhandler
 def set_psource(style: Style):
     util.print_output('请输入图片源路径:')
-    ans = util.get_input()
-    if not os.path.exists(ans):
-        raise ValueError(f'无效的图片路径 \'{ans}\'.')
-    style.psource = ans
+    ans = input.select_files(util.IMAGE_EXTENSIONS, util.IMAGE_FILETYPES)
+    if len(ans) > 0:
+        style.psource = ans[0]
 
 def get_psource(style: Style) -> str:
     return util.fomit_path('* S | 图片源: {} *', style.psource)

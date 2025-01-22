@@ -1,6 +1,7 @@
 import util
 import watermark
 
+from app import input
 from app import output
 from app import workspace
 from app import appconfig
@@ -24,6 +25,7 @@ CONFIG = appconfig.get('species_label', [
     util.Field('sstyle',    shadow.Style.DEFAULT,       shadow.Style.self_validate),
     util.Field('round',     False),
     util.Field('rstyle',    round_corner.Style.DEFAULT, round_corner.Style.self_validate),
+    util.Field('order',     ('阴影', '圆角', '水印', '物种标注')),
     util.Field('watermark', False),
     util.Field('wstyle',    watermark.Style.DEFAULT,    watermark.Style.self_validate),
 ])
@@ -43,7 +45,8 @@ def default():
     latin_name    = ''
     gender        = '未知'
     location      = ''
-    date          = datetime.today().strftime('%Y.%m.%d')
+    today         = datetime.today()
+    date          = f'{today.year}.{today.month}.{today.day}'
 
 #endregion
 
@@ -68,6 +71,7 @@ def main():
     m.add(util.Option('W', '水印样式…',    CONFIG.wstyle.set, enfunc=lambda: CONFIG.watermark))
     m.add(util.Option('R', '图像圆角',     r_main, r_value))
     m.add(util.Option('P', '圆角参数',     CONFIG.rstyle.set, enfunc=lambda: CONFIG.round))
+    m.add(util.Option('B', '效果顺序',     set_order, get_order))
     m.add(util.Option('Y', '保存当前设置', lambda: appconfig.save(CONFIG)))
     m.add(util.Splitter('- 导入与导出 -'))
     m.add(util.Option('C', '选择目标图像…', choose_targets))
@@ -233,6 +237,19 @@ def r_value() -> str:
 
 #endregion
 
+#region 效果顺序
+
+@util.errhandler
+def set_order():
+    util.print_output('请输入效果顺序:')
+    util.print_ps('例: 阴影 圆角 水印 物种标注')
+    CONFIG.order = input.input_valid_sequence(['阴影', '圆角', '水印', '物种标注'])
+
+def get_order() -> str:
+    return '→'.join(CONFIG.order)
+
+#endregion
+
 #region 图像水印
 
 def a_main():
@@ -318,18 +335,20 @@ def execute():
 def center_of(target_w: float, border_w: float) -> float:
     return (border_w - target_w) / 2
 
-@util.errhandler
-def process(img: Image.Image) -> Image.Image:
+def apply_shadow(image: Image.Image) -> Image.Image:
+    return shadow.process(CONFIG.sstyle, image) if CONFIG.shadow else image
+
+def apply_round(image: Image.Image) -> Image.Image:
+    return round_corner.process(CONFIG.rstyle, image) if CONFIG.round else image
+
+def apply_watermark(image: Image.Image) -> Image.Image:
+    return watermark.process(CONFIG.wstyle, image) if CONFIG.watermark else image
+
+def apply_label(img: Image.Image) -> Image.Image:
     twidth = width[CONFIG.size] if CONFIG.size != '自适应' else img.width
     if img.width != twidth:
         ratio = img.height / img.width
         img   = img.resize((twidth, round(twidth * ratio)))
-    
-    if CONFIG.round:
-        img = round_corner.process(CONFIG.rstyle, img)
-    
-    if CONFIG.shadow:
-        img = shadow.process(CONFIG.sstyle, img)
     
     params = get_params(img.size)
     final = Image.new('RGBA', (img.width + params['pic_margin'] * 2, img.height + params['pic_margin'] + params['pic_bottom']), 'white')
@@ -382,9 +401,18 @@ def process(img: Image.Image) -> Image.Image:
         gimg = gimg.resize((params['gender_size'], params['gender_size']))
         final.paste(gimg, (int(x), int(y)), gimg)
     
-    if CONFIG.watermark:
-        final = watermark.process(CONFIG.wstyle, final)
-    
     return final
+
+def process(image: Image.Image):
+    for effect in CONFIG.order:
+        if   effect == '阴影':
+            image = apply_shadow(image)
+        elif effect == '圆角':
+            image = apply_round(image)
+        elif effect == '水印':
+            image = apply_watermark(image)
+        elif effect == '物种标注':
+            image = apply_label(image)
+    return image
 
 #endregion

@@ -122,8 +122,8 @@ def _wrap_text_ansi_stream(stream: AnsiStream, width: int) -> AnsiStream:
 
     return AnsiStream(astrs)
 
-def print_wrap(text: strOrStream):
-    print(wrap_text(text, SPLITTER_LENGTH))
+def print_wrap(text: strOrStream, end = '\n'):
+    print(wrap_text(text, SPLITTER_LENGTH), end=end)
 
 @overload
 def center(text: str, width: int) -> str:
@@ -198,21 +198,21 @@ def print_option(key: strLike, text: strLike, value: str = None):
 def get_input(text: strLike = '') -> str:
     return input(f'< {text}')
 
-def print_output(text: strLike):
-    print(f'> {text}')
+def print_output(text: strLike, end = '\n'):
+    print(f'> {text}', end=end)
 
-def print_ps(text: str):
-    print_output(AnsiStr(text, FORMAT_PS))
+def print_ps(text: str, end = '\n'):
+    print_output(AnsiStr(text, FORMAT_PS), end=end)
 
 def wait(t: float = 1.5):
     time.sleep(t)
 
-def print_error(ex: str):
-    print_output(AnsiStr('[错误] ' + ex, FORMAT_ERROR))
+def print_error(ex: str, end = '\n'):
+    print_output(AnsiStr('[错误] ' + ex, FORMAT_ERROR), end=end)
     wait()
 
-def print_success(text: str):
-    print_output(AnsiStr(text, FORMAT_SUCCESS))
+def print_success(text: str, end = '\n'):
+    print_output(AnsiStr(text, FORMAT_SUCCESS), end=end)
     wait(1.0)
 
 def omit_str(s: str, length: int) -> str:

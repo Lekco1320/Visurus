@@ -15,7 +15,7 @@ def main():
 
 def display():
     util.print_kv('操作系统', util.fomit_str('* 操作系统: {} *', platform.platform()))
-    util.print_kv('资源路径', util.fomit_path('* 资源目录: {} *', str(resources.RESOURCE_FOLDER)))
+    util.print_kv('资源目录', util.fomit_path('* 资源目录: {} *', str(resources.RESOURCE_FOLDER)))
     util.print_splitter()
 
 @util.errhandler

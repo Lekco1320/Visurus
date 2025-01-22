@@ -33,7 +33,9 @@ def save_distory(key: str):
     items.clear()
     for i in range(readline.get_current_history_length()):
         item = readline.get_history_item(i + 1).strip()
-        if item != '' and item not in items:
+        if item != '':
+            if item in items:
+                items.remove(item)
             items.append(item)
     with open(HISTORY_FILE, 'wb') as file:
         pickle.dump(histories, file)

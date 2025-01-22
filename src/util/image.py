@@ -7,15 +7,18 @@ from PIL          import Image
 from PIL.ExifTags import Base
 from datetime     import datetime
 
+IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.bmp', '.gif', '.ico', '.psd', '.webp', '.tif', '.tiff']
+IMAGE_FILETYPES  = [('图像文件', ';'.join('*' + ext for ext in IMAGE_EXTENSIONS))]
+
 class InImage:
     def __init__(self, path: str) -> None:
-        self._path = path
-        self._dir  = os.path.dirname(path)
-        self._name = os.path.basename(path)
-        self._size = os.path.getsize(path)
-        with Image.open(path) as img:
-            self._width  = img.width
-            self._height = img.height
+        self._path   = path
+        self._dir    = os.path.dirname(path)
+        self._name   = os.path.basename(path)
+        self._size   = os.path.getsize(path)
+        raw          = self.raw
+        self._width  = raw.width
+        self._height = raw.height
     
     @property
     def path(self):
@@ -35,14 +38,16 @@ class InImage:
     
     @property
     def image(self) -> Image.Image:
-        try:
-            return Image.open(self._path).convert('RGBA')
-        except Exception as ex:
-            raise ex
+        return self.raw.convert('RGBA')
     
     @property
     def raw(self) -> Image.Image:
-        return Image.open(self._path)
+        if not os.path.isfile(self._path):
+            raise FileExistsError(f'文件\'{self.name}\'不存在.')
+        try:
+            return Image.open(self._path)
+        except Image.UnidentifiedImageError:
+            raise TypeError(f'文件\'{self.name}\'格式不支持.')
     
     @property
     def exif(self):
@@ -107,4 +112,4 @@ class OutImage:
         return fomit_str('* xx. {} @0000x0000 *', self._name) + \
                AnsiStr(f' @{self._width}x{self._height}', FORMAT_ANNO)
 
-__all__ = ["InImage", "OutImage"]
+__all__ = ["InImage", "OutImage", "IMAGE_EXTENSIONS", "IMAGE_FILETYPES"]
