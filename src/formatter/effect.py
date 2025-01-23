@@ -44,7 +44,7 @@ def main():
 def display():
     util.print_left(f'已选择 {len(targets)} 张目标图像:')
     for i in range(len(targets)):
-        util.print_left(f'{i + 1}. ' + targets[i].formated_name())
+        util.print_left(f'{i + 1}. ' + targets[i].info())
     util.print_splitter()
 
 # 选择图片对象

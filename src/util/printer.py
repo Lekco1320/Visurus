@@ -59,7 +59,7 @@ def wrap_text(text: strOrStream, width: int) -> strOrStream:
         return _wrap_text_str(text, width)
     if isinstance(text, AnsiStr):
         text = text.copy()
-        text.str = _wrap_text_str(text.str, width)
+        text.text = _wrap_text_str(text.text, width)
         return text
     if isinstance(text, AnsiStream):
         return _wrap_text_ansi_stream(text, width)
@@ -111,7 +111,7 @@ def _wrap_text_ansi_stream(stream: AnsiStream, width: int) -> AnsiStream:
     offset = 0
     for astr in stream._astrs:
         astr = astr.copy()
-        astr.str = _wrap_text_str(astr.str, width, offset)
+        astr.text = _wrap_text_str(astr.text, width, offset)
         astrs.append(astr)
         
         offset  = 0
@@ -185,7 +185,7 @@ def kv(key: str, value: str = None):
     main = f'{key}'
     if value != None:
         main += ': '
-        fstr.str = value
+        fstr.text = value
     return main + fstr
 
 def print_kv(key: str, value: str = None):
@@ -215,7 +215,7 @@ def print_success(text: str, end = '\n'):
     print_output(AnsiStr(text, FORMAT_SUCCESS), end=end)
     wait(1.0)
 
-def omit_str(s: str, length: int) -> str:
+def omit_str(s: strOrStream, length: int) -> strOrStream:
     leng = len(s)
     if length < 1:
         return ''
@@ -227,9 +227,13 @@ def omit_str(s: str, length: int) -> str:
     while end > 0 and text_width(ret) >= length:
         end -= 1
         ret  = s[:end]
-    return f'{s[:end]}…'
+    if isinstance(ret, str):
+        ret += '…'
+    else:
+        ret.append('…')
+    return ret
 
-def fomit_str(fstr: str, s: str) -> str:
+def fomit_str(fstr: str, s: strOrStream) -> strOrStream:
     count       = fstr.count('{}')
     placeholder = fstr.replace('{}', '')
     if count <= 0:

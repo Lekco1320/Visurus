@@ -82,7 +82,7 @@ def preview():
         return
     
     for id in choose():
-        workspace.image_window(images[id - 1].img, images[id - 1].name)
+        workspace.image_window(images[id - 1].image, images[id - 1].name)
 
 def p_main():
     global chosen
@@ -202,8 +202,8 @@ def output():
             raise ValueError(f'文件名\"{name}\"中含有非法字符.')
         
         path = os.path.join(dir, name)
-        if format in ['JPEG', 'BMP'] and images[i - 1].img.mode == 'RGBA':
+        if format in ['JPEG', 'BMP'] and images[i - 1].image.mode == 'RGBA':
             images[i - 1].convert('RGB')
-        images[i - 1].img.save(path, format)
+        images[i - 1].image.save(path, format)
         util.print_success(f'{name} 导出成功.')
     util.wait()

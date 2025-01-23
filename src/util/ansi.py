@@ -1,3 +1,5 @@
+from bisect import bisect_right
+
 from enum import Enum
 from enum import Flag
 
@@ -108,7 +110,7 @@ class AnsiFormat:
                self._background == value._background
     
     def __repr__(self) -> str:
-        return f'format{{{self._style}, {self._foreground}, {self._background}}}'
+        return f'AnsiFormat{{{self._style}, {self._foreground}, {self._background}}}'
     
     def __str__(self) -> str:
         return self.__repr__()
@@ -121,56 +123,59 @@ ERROR_FORMAT   = AnsiFormat(foreground=AnsiColor.BRIGHT_RED)
 PS_FORMAT      = AnsiFormat(foreground=AnsiColor.BLUE)
 
 class AnsiStr:
-    def __init__(self, str: str, format: AnsiFormat) -> None:
-        self._str    = str
+    def __init__(self, text: str, format: AnsiFormat) -> None:
+        self._text   = text
         self._format = format
-        
-    @property
-    def str(self) -> str:
-        return self._str
     
-    @str.setter
-    def str(self, value: 'str'):
-        self._str = value
+    @property
+    def text(self) -> str:
+        return self._text
+    
+    @text.setter
+    def text(self, value: str):
+        self._text = value
     
     @property
     def format(self) -> AnsiFormat:
         return self._format
     
     @format.setter
-    def format(self, value: format):
+    def format(self, value: AnsiFormat):
         self._format = value
     
     def copy(self) -> 'AnsiStr':
-        return AnsiStr(self._str, self._format.copy())
+        return AnsiStr(self._text, self._format.copy())
+    
+    def append(self, text: str):
+        self._text += text
     
     def __iter__(self):
-        return iter(self._str)
+        return iter(self._text)
     
-    def __str__(self) -> 'str':
-        return self._format.enable_ansi + self.str + self._format.disable_ansi
+    def __str__(self) -> str:
+        return self._format.enable_ansi + self.text + self._format.disable_ansi
     
-    def __repr__(self) -> 'str':
-        return f'ansi_str{{"{self._str}", {self._format}}}'
+    def __repr__(self) -> str:
+        return f'AnsiStr{{"{self._text}", {self._format}}}'
     
     def __len__(self) -> int:
-        return self._str.__len__()
+        return self._text.__len__()
     
-    def __getitem__(self, key) -> 'str':
+    def __getitem__(self, key) -> 'AnsiStr':
         if isinstance(key, slice):
             start, stop, step = key.start, key.stop, key.step
-            return self._str[start:stop:step]
-        return self._str[key]
-
+            return AnsiStr(self._text[start:stop:step], self._format)
+        return AnsiStr(self._text[key], self._format)
+    
     def __eq__(self, value: object) -> bool:
         if not isinstance(value, AnsiStr):
             return False
-        return self._format == value._format and self.str == value.str
+        return self._format == value._format and self.text == value.text
     
     def __hash__(self) -> int:
-        return hash((self._format, self._str))
+        return hash((self._format, self._text))
     
-    def __add__(self, other: Union['str', 'AnsiStr', 'AnsiStream']) -> 'AnsiStream':
+    def __add__(self, other: Union[str, 'AnsiStr', 'AnsiStream']) -> 'AnsiStream':
         if isinstance(other, str):
             astr = AnsiStr(other, AnsiFormat())
             return AnsiStream([self, astr])
@@ -180,8 +185,9 @@ class AnsiStr:
             ret = other.copy()
             ret._astrs.insert(0, self)
             return ret
+        raise ValueError('Unsupported type.')
     
-    def __radd__(self, other: Union['str', 'AnsiStr', 'AnsiStream']) -> 'AnsiStream':
+    def __radd__(self, other: Union[str, 'AnsiStr', 'AnsiStream']) -> 'AnsiStream':
         if isinstance(other, str):
             astr = AnsiStr(other, AnsiFormat())
             return AnsiStream([astr, self])
@@ -191,6 +197,7 @@ class AnsiStr:
             ret = other.copy()
             ret._astrs.append(self)
             return ret
+        raise ValueError('Unsupported type.')
 
 class AnsiStream:
     @overload
@@ -219,26 +226,45 @@ class AnsiStream:
         elif isinstance(strs, Iterable):
             for astr in strs:
                 if not isinstance(astr, AnsiStr):
-                    raise ValueError('Unknown str type.')
+                    raise ValueError('Unsupported type.')
                 self._astrs.append(astr.copy())
     
     def copy(self) -> 'AnsiStream':
         ret = AnsiStream()
         for astr in self._astrs:
-            ret._astrs.append(astr)
+            ret._astrs.append(astr.copy())
         return ret
     
-    def plain_str(self) -> str:
-        return ''.join(astr.str for astr in self._astrs)
+    def plain_text(self) -> str:
+        return ''.join(astr.text for astr in self._astrs)
+    
+    def append(self, text: str):
+        if len(self._astrs) > 0:
+            self._astrs[-1].text += text
+        else:
+            self._astrs.append(AnsiStr(text, AnsiFormat()))
     
     def __str__(self) -> str:
         return ''.join(astr.__str__() for astr in self._astrs)
     
+    def __repr__(self) -> str:
+        return f'AnsiStream{{{", ".join(repr(astr) for astr in self._astrs)}}}'
+    
     def __len__(self) -> int:
-        return sum([astr.__len__() for astr in self._astrs])
+        return len(self.plain_text())
     
     def __iter__(self):
-        return iter(''.join(astr._str for astr in self._astrs))
+        return iter(self.plain_text())
+    
+    def __iadd__(self, other: Union[str, AnsiStr, 'AnsiStream']) -> 'AnsiStream':
+        if isinstance(other, str):
+            self._astrs.append(AnsiStr(other, AnsiFormat()))
+        if isinstance(other, AnsiStr):
+            self._astrs.append(other)
+        if isinstance(other, AnsiStream):
+            for astr in other._astrs:
+                self._astrs.append(astr)
+        return self
     
     def __add__(self, other: Union[str, AnsiStr, 'AnsiStream']) -> 'AnsiStream':
         ret = self.copy()
@@ -252,33 +278,47 @@ class AnsiStream:
             for astr in other._astrs:
                 ret._astrs.append(astr)
             return ret
+        raise ValueError('Unsupported type.')
     
     def __radd__(self, other: Union[str, AnsiStr, 'AnsiStream']) -> 'AnsiStream':
+        ret = self.copy()
         if isinstance(other, str):
-            ret = self.copy()
             ret._astrs.insert(0, AnsiStr(other, AnsiFormat()))
             return ret
         if isinstance(other, AnsiStr):
-            ret = self.copy()
             ret._astrs.insert(0, other)
             return ret
         if isinstance(other, AnsiStream):
-            ret = other.copy()
             for astr in self._astrs:
                 ret._astrs.append(astr)
             return ret
+        raise ValueError('Unsupported type.')
     
-    def __getitem__(self, key) -> str:
-        if isinstance(key, slice):
-            plain = ''.join([a._str for a in self._astrs])
-            start, stop, step = key.start, key.stop, key.step
-            return plain[start:stop:step]
-        
+    def __getitem__(self, key) -> 'AnsiStream':
+        ret       = AnsiStream()
+        intervals = []
+        index     = 0
+        plain_str = self.plain_text()
+        full_len  = len(plain_str)
         for astr in self._astrs:
-            if 0 <= key < astr.__len__():
-                return astr[key]
-            key -= astr.__len__()
-        raise IndexError('Index out of range.')
+            intervals.append(index)
+            index += len(astr)
+        last_index = None
+        
+        if isinstance(key, slice):
+            for i in list(range(full_len))[key]:
+                index = bisect_right(intervals, i) - 1
+                if index == last_index:
+                    ret._astrs[-1]._text += plain_str[i]
+                else:
+                    ret._astrs.append(AnsiStr(plain_str[i], self._astrs[index]._format))
+                    last_index = index
+            return ret
+        
+        if not 0 <= key < full_len:
+            raise IndexError('Index out of range.')
+        index = bisect_right(intervals, i) - 1
+        ret._astrs.append(AnsiStr(plain_str[i], self._astrs[index]._format))
 
 strLike     = Union[str, AnsiStr]
 strOrStream = Union[str, AnsiStr, AnsiStream]

@@ -78,15 +78,15 @@ class InImage:
         value = data.get(key, None)
         return formatfunc(value) if value != None else default
     
-    def formated_name(self) -> AnsiStream:
-        return fomit_path('* xx. {} @0000x0000 *', self._path) + \
+    def info(self, fstr: str = "* xx. {} @0000x0000 *") -> AnsiStream:
+        return fomit_path(fstr, self._path) + \
                AnsiStr(f' @{self._width}x{self._height}', FORMAT_ANNO)
 
 class OutImage:
-    def __init__(self, new: Image.Image, src: InImage = None):
-        self._img    = new
-        self._width  = new.width
-        self._height = new.height
+    def __init__(self, image: Image.Image, src: InImage = None):
+        self._image  = image
+        self._width  = image.width
+        self._height = image.height
         self._dir    = None
         self._name   = None
         if isinstance(src, InImage):
@@ -94,8 +94,8 @@ class OutImage:
             self._name = src._name
     
     @property
-    def img(self):
-        return self._img
+    def image(self):
+        return self._image
     
     @property
     def dir(self):
@@ -106,7 +106,7 @@ class OutImage:
         return self._name
     
     def convert(self, mode: str) -> None:
-        self._img = self._img.convert(mode)
+        self._image = self._image.convert(mode)
     
     def formated_name(self) -> AnsiStream:
         return fomit_str('* xx. {} @0000x0000 *', self._name) + \

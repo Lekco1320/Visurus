@@ -21,7 +21,7 @@ def main():
 def display():
     util.print_left(f'已导入 {len(images)} 张图像:')
     for i in range(len(images)):
-        util.print_left(f'{i + 1}. ' + images[i].formated_name())
+        util.print_left(f'{i + 1}. ' + images[i].info())
     util.print_splitter()
 
 def contain_image(path: str) -> bool:
@@ -118,7 +118,7 @@ def c_init():
 def c_display():
     util.print_left(f'已选择 {len(chosen)} 张图像:')
     for i in range(len(chosen)):
-        util.print_left(f'{i + 1}. ' + chosen[i].formated_name())
+        util.print_left(f'{i + 1}. ' + chosen[i].info())
     util.print_splitter()
 
 def c_main() -> list[util.InImage]:

@@ -86,7 +86,7 @@ def single_main(image: util.InImage):
     m.run()
 
 def display(image: util.InImage):
-    util.print_left('当前图像: ' + image.formated_name())
+    util.print_left('当前图像: ' + image.info('* 当前图像: {} @0000x0000 *'))
     util.print_splitter()
 
 #endregion

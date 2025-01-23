@@ -40,7 +40,7 @@ def display():
     if len(targets) > 0:
         util.print_left('目标图像顺序:')
         for i in range(len(targets)):
-            util.print_left(f'{i + 1}. ' + targets[i].formated_name())
+            util.print_left(f'{i + 1}. ' + targets[i].info())
     else:
         util.print_left('目标图像为空.')
     util.print_splitter()
