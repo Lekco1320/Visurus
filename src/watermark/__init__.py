@@ -1,8 +1,8 @@
+from .style  import Style
 from .main   import main_menu, process
 from .scaler import *
 from .anchor import *
 from .mark   import *
-from .style  import Style
 
 __all__ = [
     "Scaler",

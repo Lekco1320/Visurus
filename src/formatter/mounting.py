@@ -1,5 +1,4 @@
 import util
-import watermark
 
 from app import input
 from app import output
@@ -8,14 +7,15 @@ from app import appconfig
 
 from PIL import Image
 
+from . import effects_option
+
 targets: list[util.InImage] = []
 
 CONFIG = appconfig.get('mounting', [
-    util.Field('width',     0.1),
-    util.Field('height',    0.08),
-    util.Field('color',     util.Color('#FFFFFFFF')),
-    util.Field('watermark', False),
-    util.Field('wstyle',    watermark.Style.default(), watermark.Style.self_validate)
+    util.Field('width',  0.05),
+    util.Field('height', 0.03),
+    util.Field('color',  util.Color('#FFFFFFFF')),
+    util.Field('estyle', effects_option.Style('图像装裱'))
 ])
 
 @util.errhandler
@@ -25,9 +25,8 @@ def main():
     m.add(util.Splitter('- 装裱参数 -'))
     m.add(util.Option('W', '边距宽度', lambda: margin_main('width'),  lambda: margin_value('width')))
     m.add(util.Option('H', '边距高度', lambda: margin_main('height'), lambda: margin_value('height')))
-    m.add(util.Option('B', '裱褙颜色', set_color,                     get_color))
-    m.add(util.Option('E', '图像水印', e_main,                        e_value))
-    m.add(util.Option('S', '水印样式…', CONFIG.wstyle.set,            enfunc=lambda: CONFIG.watermark))
+    m.add(util.Option('B', '裱褙颜色',    set_color, get_color))
+    m.add(util.Option('E', '效果与水印…', CONFIG.estyle.set))
     m.add(util.Option('Y', '保存当前设置', lambda: appconfig.save(CONFIG)))
     m.add(util.Splitter('- 导入与导出 -'))
     m.add(util.Option('C', '选择目标图像…', choose_targets))
@@ -77,34 +76,15 @@ def set_color():
 def get_color() -> str:
     return CONFIG.color.hex
 
-#region 图像水印
-
-def e_main():
-    m = util.Menu('Lekco Visurus - 图像水印')
-    m.add(util.Option('E', '启用', e_enable))
-    m.add(util.Option('D', '关闭', e_disable))
-    m.run()
-
-def e_enable():
-    CONFIG.watermark = True
-
-def e_disable():
-    CONFIG.watermark = False
-
-def e_value() -> str:
-    return '启用' if CONFIG.watermark else '关闭'
-
-#endregion
-
 @util.errhandler
 def execute():
     if len(targets) <= 0:
         raise ValueError('目标图像为空.')
     
     out = []
-    for img in targets:
-        result = process(img.image)
-        out.append(util.OutImage(result, img))
+    for srcimg in targets:
+        result = CONFIG.estyle.process(process, srcimg.image)
+        out.append(util.OutImage(result, srcimg))
     if len(out) > 0:
         output.main(out)
 
@@ -125,8 +105,6 @@ def process(image: Image.Image) -> Image.Image:
     else:
         y       = int(CONFIG.height * image.height)
         height += y * 2
-    if CONFIG.watermark:
-        image = watermark.process(CONFIG.wstyle, image)
-    result = Image.new('RGBA', (width, height), CONFIG.color)
+    result = Image.new('RGBA', (width, height), CONFIG.color.hex)
     result.paste(image, (x, y), image)
     return result

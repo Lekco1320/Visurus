@@ -1,5 +1,4 @@
 import util
-import os
 
 from app import input
 from app import resources
@@ -13,9 +12,9 @@ class Style(util.Config):
         util.Field('color',    util.Color('#0000007F')),
         util.Field('text',     'Lekco'),
         util.Field('psource',  '无'),
-        util.Field('opacity',  100),
+        util.Field('opacity',  80),
         util.Field('aligns',   ['居中对齐', '底部对齐']),
-        util.Field('scale',    ['固定尺寸', ('*', 20)]),
+        util.Field('scale',    ['比例缩放', '宽', 0.05]),
         util.Field('position', '图像下中央'),
         util.Field('offset',   (0, 0))
     ]

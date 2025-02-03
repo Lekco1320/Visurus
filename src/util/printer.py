@@ -256,10 +256,19 @@ def omit_path(path: pathLike, length: int) -> str:
     parts = path.split(os.sep)
     leng  = len(parts)
     
+    def rev_truncate(s: str, width: int) -> str:
+        length = len(s)
+        start  = max(length - width, 0)
+        ret    = s[start:]
+        while start < length and text_width(ret) > width:
+            start += 1
+            ret    = s[start:]
+        return ret
+    
     if leng == 0:
-        return f'…{path[-(length - 1):]}'
+        return f'…{rev_truncate(path, length - 1)}'
     if leng == 1 or text_width(parts[-1]) >= length - 1:
-        return f'…{parts[-1][-(length - 1):]}'
+        return f'…{rev_truncate(parts[-1], length - 1)}'
     if parts[0].endswith(':'):
         parts[0] += os.sep
     

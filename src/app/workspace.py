@@ -68,7 +68,7 @@ def input_file_or_folder(path: str):
         for file in files:
             if input.check_extension(file, util.IMAGE_EXTENSIONS) and \
                not contain_image(path):
-                images.append(util.InImage(path))
+                images.append(util.InImage(file))
     if os.path.isfile(path) and \
        input.check_extension(path, util.IMAGE_EXTENSIONS) and \
        not contain_image(path):

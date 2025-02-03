@@ -6,19 +6,19 @@ from app import output
 from app import workspace
 from app import appconfig
 
-from formatter import shadow
-from formatter import round_corner
+from . import shadow
+from . import round_corner
 
 from PIL import Image
 
 CONFIG = appconfig.get('effect', [
     util.Field('shadow',    False),
-    util.Field('sstyle',    shadow.Style.DEFAULT,       shadow.Style.self_validate),
+    util.Field('sstyle',    shadow.Style.DEFAULT),
     util.Field('round',     False),
-    util.Field('rstyle',    round_corner.Style.DEFAULT, round_corner.Style.self_validate),
+    util.Field('rstyle',    round_corner.Style.DEFAULT),
     util.Field('order',     ('阴影', '圆角', '水印')),
     util.Field('watermark', False),
-    util.Field('wstyle',    watermark.Style.DEFAULT,    watermark.Style.self_validate),
+    util.Field('wstyle',    watermark.Style.DEFAULT),
 ])
 
 targets = []

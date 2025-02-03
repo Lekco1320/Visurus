@@ -14,8 +14,9 @@ from app import appconfig
 from PIL import Image
 
 targets = []
+
 CONFIG  = appconfig.get('watermark', [
-    util.Field('style', Style.DEFAULT, Style.self_validate)
+    util.Field('style', Style.DEFAULT)
 ])
 
 #region 主函数

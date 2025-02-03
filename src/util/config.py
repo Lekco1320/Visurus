@@ -1,10 +1,6 @@
 from typing import *
 
 class Field:
-    @staticmethod
-    def _void(_: Any) -> bool:
-        return False
-    
     @overload
     def __init__(self, name: str) -> None:
         ...
@@ -17,7 +13,7 @@ class Field:
     def __init__(self, name: str, default: Any, predicate: Callable) -> None:
         ...
     
-    def __init__(self, name: str, default: Any = None, predicate: Callable = _void) -> None:
+    def __init__(self, name: str, default: Any = None, predicate: Callable = None) -> None:
         self._name      = name
         self._default   = default
         self._predicate = predicate
@@ -57,9 +53,17 @@ class Config:
         all = set(self.__dict__.keys())
         for field in fields:
             name = field.name
-            if not hasattr(self, name) or field.predicate(getattr(self, name)):
-                setattr(self, name, field.default)
+            if hasattr(self, name):
+                value = getattr(self, name)
+                if isinstance(value, Config):
+                    if self.self_validate():
+                        ret = True
+                elif callable(field.predicate) and field.predicate(value):
+                    ret = True
+            else:
                 ret = True
+            if ret:
+                setattr(self, name, field.default)
             all.discard(name)
         for other in all:
             if other.startswith('_'):
@@ -67,6 +71,9 @@ class Config:
             delattr(self, other)
             ret = True
         return ret
+    
+    def self_validate(self) -> bool:
+        ...
 
 class AppConfigs:
     def __init__(self, version) -> None:

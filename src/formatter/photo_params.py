@@ -1,5 +1,4 @@
 import util
-import watermark
 
 from app import input
 from app import output
@@ -15,24 +14,22 @@ from PIL import ImageFilter
 from PIL import ImageEnhance
 
 from PIL.ExifTags import Base
-from formatter    import shadow
+
+from . import effects_option
 
 #region 变量
 
-targets: list[util.InImage] = []
-out: list[util.OutImage]    = []
-
 CONFIG = appconfig.get('photo_params', [
-    util.Field('size',          '2K'),
-    util.Field('shadow',        False),
-    util.Field('sstyle',        shadow.Style.DEFAULT,    shadow.Style.self_validate),
-    util.Field('watermark',     False),
-    util.Field('wstyle',        watermark.Style.DEFAULT, watermark.Style.self_validate),
+    util.Field('size',          '4K'),
+    util.Field('estyle',        effects_option.Style('标注参数')),
     util.Field('typeset',       '底部双侧标注'),
     util.Field('bottom_side',   ['{B}', '{D}', '{L} {F} {E} {I}', '{T}']),
     util.Field('bottom_center', ['Shot on ', '{D} ', '{M} ', '{L} {F} {E} {I}']),
     util.Field('back_blur',     ['{D}', '{L} {F} {E} {I}', 50, 0.45]),
 ])
+
+targets: list[util.InImage] = []
+out: list[util.OutImage]    = []
 
 width = { '1080P' : 1920, '2K' : 2560, '4K' : 3840 }
 info  = None
@@ -75,14 +72,12 @@ def single_main(image: util.InImage):
     m.add(util.Option('C', '排版参数…',  bottom_center_main, enfunc=lambda: CONFIG.typeset == '底部中央标注'))
     m.add(util.Option('C', '排版参数…',  blur_main,          enfunc=lambda: CONFIG.typeset == '背景模糊标注'))
     m.add(util.Option('S', '图像尺寸',   s_main,             s_value))
-    m.add(util.Option('N', '图像阴影',   n_main,             n_value))
-    m.add(util.Option('H', '阴影效果…',  CONFIG.sstyle.set,  enfunc=lambda: CONFIG.shadow))
-    m.add(util.Option('W', '图像水印',   w_main,             w_value))
-    m.add(util.Option('A', '水印样式…',  CONFIG.wstyle.set,  enfunc=lambda: CONFIG.watermark))
+    m.add(util.Option('H', '效果与水印…',  CONFIG.estyle.set))
     m.add(util.Option('Y', '保存当前设置', lambda: appconfig.save(CONFIG)))
     m.add(util.Splitter('- 导出 -'))
-    m.add(util.Option('O', '完成设置', lambda: process(image, m)))
-    m.add(util.Option('X', '跳过'))
+    m.add(util.Option('V', '查看原图', lambda: workspace.image_window(image.image, image.name)))
+    m.add(util.Option('O', '完成设置', lambda: execute(image, m)))
+    m.add(util.Option('X', '放弃'))
     m.run()
 
 def display(image: util.InImage):
@@ -183,44 +178,6 @@ def s_fit():
 
 def s_value() -> str:
     return CONFIG.size
-
-#endregion
-
-#region 图像阴影
-
-def n_main():
-    m = util.Menu('Lekco Visurus - 图像阴影')
-    m.add(util.Option('E', '启用', e_enable))
-    m.add(util.Option('D', '关闭', e_disable))
-    m.run()
-
-def e_enable():
-    CONFIG.shadow = True
-
-def e_disable():
-    CONFIG.shadow = False
-
-def n_value() -> str:
-    return '启用' if CONFIG.shadow else '关闭'
-
-#endregion
-
-#region 图像水印
-
-def w_main():
-    m = util.Menu('Lekco Visurus - 图像水印')
-    m.add(util.Option('E', '启用', w_enable))
-    m.add(util.Option('D', '关闭', w_disable))
-    m.run()
-
-def w_enable():
-    CONFIG.watermark = True
-
-def w_disable():
-    CONFIG.watermark = False
-
-def w_value() -> str:
-    return '启用' if CONFIG.watermark else '关闭'
 
 #endregion
 
@@ -335,19 +292,18 @@ params_map = {
 def param_to_str(attrname: str, id: int) -> str:
     return getattr(CONFIG, attrname)[id].format_map({key : info[params_map[key]] for key in params_map.keys()})
 
-def process(image: util.InImage, menu: util.Menu):
-    img = resize(image.image)
-    if CONFIG.watermark:
-        img = shadow.process(CONFIG.sstyle, img)
+@util.errhandler
+def execute(srcimg: util.InImage, menu: util.Menu):
+    img  = resize(srcimg.image)
+    func = None
     if   CONFIG.typeset == '底部双侧标注':
-        img = process_bottom_side(img)
+        func = process_bottom_side
     elif CONFIG.typeset == '底部中央标注':
-        img = process_bottom_center(img)
+        func = process_bottom_center
     elif CONFIG.typeset == '背景模糊标注':
-        img = process_blur(img)
-    if CONFIG.watermark:
-        img = watermark.main.process(CONFIG.wstyle, img)
-    out.append(util.OutImage(img, image))
+        func = process_blur
+    processed = CONFIG.estyle.process(func, img)
+    out.append(util.OutImage(processed, srcimg))
     menu.exit()
 
 def resize(image: Image.Image) -> Image.Image:
